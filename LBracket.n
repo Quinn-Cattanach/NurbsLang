@@ -1,0 +1,22 @@
+
+component LBracket {
+    var radius: [0, 2]
+
+    volume: Box(u: 10, v: 3, w: 1).bend(face: (u, v, 1), 
+                                        angle: 90 degrees, 
+                                        radius: radius, 
+                                        creaseAngle: 0, 
+                                        creaseOrigin: (0, 0.5))
+
+    material: Aluminum
+
+    boundaryConditions: [
+        Directional(direction: -w, condition: Dirichlet(0)),
+        Directional(direction: u, condition: Neumann(10 * -w))
+    ]
+}
+
+minimize(
+    MaxStress,
+    LBracket,
+)
