@@ -1,6 +1,6 @@
 
 #pragma once
-#include "nurbs.hpp"
+#include "nurbs_include.h"
 
 template <size_t dimension>
 nurbs<dimension> Hyperbox(const std::array<double, dimension> &sizes)
@@ -12,10 +12,10 @@ nurbs<dimension> Hyperbox(const std::array<double, dimension> &sizes)
 
 nurbs<2> Rectangle(double width, double height)
 {
-    return Hypercube<2>({width, height});
+    return Hyperbox<2>({width, height});
 }
 
 nurbs<3> Box(double width, double height, double depth)
 {
-    return Hypercube<3>({width, height, depth});
+    return Hyperbox<3>({width, height, depth});
 }

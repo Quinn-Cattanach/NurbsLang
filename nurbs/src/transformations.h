@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nurbs.hpp"
+#include "nurbs_include.h"
 
 // void nurbs<2>::bend(
 //     size_t param_dim,   // which parametric direction to fold along
@@ -9,8 +9,8 @@
 //     double radius       // bending radius
 // );
 
-void nurbs<3>::bend(
-    size_t param_dim,
-    double param_value,
-    double angle,
-    double radius);
+// void nurbs<3>::bend(
+//     size_t param_dim,
+//     double param_value,
+//     double angle,
+//     double radius);

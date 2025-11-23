@@ -1,17 +1,16 @@
 #pragma once
-#include <vector>
-#include <array>
-#include <gismo/gismo.h>
+#include "nurbs_include.h"
+using namespace gismo;
 
 template <size_t dimension>
 struct nurbs
 {
     size_t degree[dimension];
     std::vector<double> knot[dimension];
-    std::vector<gismo::gsVector3d<double>> control;
+    std::vector<gsVector3d<double>> control;
     std::vector<double> weight;
 
-    int evaluate(const std::array<double, dimension> &param, gismo::gsVector3d<double> *result) const;
+    int evaluate(const std::array<double, dimension> &param, gsVector3d<double> *result) const;
 
 private:
     size_t flatten_index(const std::array<size_t, dimension> &indices) const

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "nurbs.hpp"
+#include "nurbs_include.h"
 
 struct boundary_condition
 {
@@ -20,7 +20,7 @@ struct boundary_condition
 
         struct
         {
-            Eigen::Vector3d normal_derivative;
+            gsVector3d<double> normal_derivative;
         } neumann;
 
     } parameter;

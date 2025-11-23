@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nurbs.hpp"
+#include "nurbs_include.h"
 
 template <size_t dimension>
 double nurbs<dimension>::basis(size_t dim, size_t index, double x, size_t deg) const
@@ -23,12 +23,12 @@ double nurbs<dimension>::basis(size_t dim, size_t index, double x, size_t deg) c
 }
 
 template <size_t dimension>
-int nurbs<dimension>::evaluate(const std::array<double, dimension> &param, Eigen::Vector3d *result) const
+int nurbs<dimension>::evaluate(const std::array<double, dimension> &param, gsVector3d<double> *result) const
 {
     if (!result)
         return -1;
 
-    *result = Eigen::Vector3d::Zero();
+    *result = gsVector3d<double>::Zero();
     double denominator = 0.0;
 
     std::array<size_t, dimension> indices{};

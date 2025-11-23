@@ -1,5 +1,6 @@
 
 #pragma once
+#include "nurbs_include.h"
 
 struct material
 {
