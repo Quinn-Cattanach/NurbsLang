@@ -1,33 +1,23 @@
-cmake_minimum_required(VERSION 3.16)
-project(nurbs LANGUAGES CXX)
-
+cmake_minimum_required(VERSION 3.20)
+project(NurbsProject)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(GISMO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../gismo")
-set(GISMO_BUILD "${GISMO_ROOT}/build")
+# Add src headers
+set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 
-set(GISMO_INCLUDE_DIR "${GISMO_ROOT}/src")
-set(GISMO_LIB_DIR "${GISMO_BUILD}/lib")
+# Library path - MUST come before add_executable
+link_directories(/opt/homebrew/lib)
 
-file(GLOB_RECURSE NURBS_SRC "src/*.cpp" "src/*.h")
+# Add executable
+file(GLOB SOURCES "${SRC_DIR}/*.cpp")
+add_executable(nurbs ${SOURCES})
 
-add_executable(nurbs_app ${NURBS_SRC})
-
-target_include_directories(nurbs_app PRIVATE
-    "${GISMO_ROOT}/src"
-    "${GISMO_ROOT}/external/gsEigen/src"
+# Include paths
+target_include_directories(nurbs PRIVATE
+    ${SRC_DIR}                 # your own headers
+    /opt/homebrew/include      # G+Smo + other deps
+    /opt/homebrew/include/gismo
 )
 
-file(GLOB GISMO_LIBS "${GISMO_LIB_DIR}/*.a")
-
-target_link_libraries(nurbs_app PRIVATE
-    ${GISMO_LIBS}
-)
-
-target_compile_definitions(nurbs_app PRIVATE
-    EIGEN_NO_DEBUG
-)
-
-message(STATUS "Using gismo from: ${GISMO_ROOT}")
-message(STATUS "Using gismo libs: ${GISMO_LIBS}")
+# Link libraries
+target_link_libraries(nurbs gismo)
