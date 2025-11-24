@@ -8,7 +8,4 @@ struct material
     double poisson_ratio;
 };
 
-material Aluminum = {
-    .youngs_modulus_Pa = 69e9,
-    .poisson_ratio = 0.33,
-};
+extern material Aluminum;

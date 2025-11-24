@@ -1,14 +1,15 @@
+#pragma once
+#include <vector>
+#include <string>
+#include <gismo/gismo.h>
 
-#ifndef MESH_H
-#define MESH_H
+using namespace gismo;
 
-#include "nurbs_lib.h"
-
-typedef struct
+struct mesh
 {
-    size_t n_tri;
-    vec3_t *vertices;
-    vec3_t *norms;
-} mesh_t;
+    std::vector<gsVector3d<double>> vertices;
 
-#endif
+    void to_stl(const std::string &filename) const;
+
+    void append(const mesh &other);
+};
