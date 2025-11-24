@@ -49,7 +49,10 @@ void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods, std::st
                     for (size_t f = 0; f < num_fixed; f += 1)
                     {
                         size_t fixed_dim = fixed_indices[f];
-                        outward[fixed_dim] = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
+                        if (fixed_dim < 3)
+                        {
+                            outward[fixed_dim] = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
+                        }
                     }
 
                     for (size_t t = 0; t < face_mesh.vertices.size(); t += 3)

@@ -42,7 +42,9 @@ int main(int argc, char *argv[])
 
     nurbs<3> result = curved_surface.sweep(extrude_path);
 
-    result.to_stl({50, 50, 50}, "sample_volume.stl");
+    nurbs<4> doubleit = result.sweep(extrude_path);
+
+    doubleit.to_stl({20, 20, 20, 20}, "sample_volume.stl");
 
     return 0;
 }

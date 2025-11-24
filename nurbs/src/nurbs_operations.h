@@ -39,7 +39,7 @@ nurbs<dimension + 1> nurbs<dimension>::sweep(const nurbs<1> &path) const
             for (size_t d = 0; d < dimension; d += 1)
             {
                 indices[d] += 1;
-                if (indices[d] < knot[d].size() - degree[d] - 1)
+                if (indices[d] < n_control(d))
                     break;
                 indices[d] = 0;
                 if (d == dimension - 1)
