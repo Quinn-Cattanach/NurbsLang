@@ -10,7 +10,7 @@ nurbs<3> box(float width, float height, float depth)
     return hyperbox<3>({width, height, depth});
 }
 
-nurbs<1> line(float length, gsVector3d<float> direction)
+nurbs<1> line(float length, vec3f_wgsl direction)
 {
     nurbs<1> result;
 
@@ -27,8 +27,8 @@ nurbs<1> line(float length, gsVector3d<float> direction)
     result.control.emplace_back(0.0, 0.0, 0.0);
     result.weight.emplace_back(1.0);
 
-    gsVector3d end = length * direction;
-    result.control.emplace_back(end[0], end[1], end[2]);
+    vec3f_wgsl end = length * direction;
+    result.control.emplace_back(end.x, end.y, end.z);
     result.weight.emplace_back(1.0);
 
     return result;

@@ -20,7 +20,7 @@ struct boundary_condition
 
         struct
         {
-            gsVector3d<float> normal_derivative;
+            vec3f_wgsl normal_derivative;
         } neumann;
 
     } parameter;

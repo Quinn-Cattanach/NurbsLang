@@ -6,10 +6,10 @@ struct nurbs
 {
     std::array<size_t, dimension> degree;
     std::array<std::vector<float>, dimension> knot;
-    std::vector<gsVector3d<float>> control;
+    std::vector<vec3f_wgsl> control;
     std::vector<float> weight;
 
-    int evaluate(const std::array<float, dimension> &param, gsVector3d<float> *result) const;
+    int evaluate(const std::array<float, dimension> &param, vec3f_wgsl *result) const;
 
     int bend(
         size_t param_dim,
