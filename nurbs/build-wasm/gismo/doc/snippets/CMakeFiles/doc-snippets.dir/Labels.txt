@@ -1,0 +1,5 @@
+# Target labels
+ doc-snippets
+# Directory labels
+ doc-snippets
+# Source files and their labels

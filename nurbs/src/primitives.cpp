@@ -1,11 +1,35 @@
 #include "primitives.h"
 
-nurbs<2> Rectangle(double width, double height)
+nurbs<2> rectangle(float width, float height)
 {
-    return Hyperbox<2>({width, height});
+    return hyperbox<2>({width, height});
 }
 
-nurbs<3> Box(double width, double height, double depth)
+nurbs<3> box(float width, float height, float depth)
 {
-    return Hyperbox<3>({width, height, depth});
+    return hyperbox<3>({width, height, depth});
+}
+
+nurbs<1> line(float length, gsVector3d<float> direction)
+{
+    nurbs<1> result;
+
+    const float nrm = direction.norm();
+    if (nrm != 0.0)
+        direction /= nrm;
+
+    result.degree[0] = 1;
+    result.knot[0] = {0.0, 0.0, 1.0, 1.0};
+
+    result.control.reserve(2);
+    result.weight.reserve(2);
+
+    result.control.emplace_back(0.0, 0.0, 0.0);
+    result.weight.emplace_back(1.0);
+
+    gsVector3d end = length * direction;
+    result.control.emplace_back(end[0], end[1], end[2]);
+    result.weight.emplace_back(1.0);
+
+    return result;
 }

@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/examples/bSplineBasis_example.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"examples"
+		],
+		"name" : "bSplineBasis_example"
+	}
+}

@@ -21,7 +21,7 @@ nurbs<dimension + 1> nurbs<dimension>::sweep(const nurbs<1> &path) const
 
     for (size_t w = 0; w < path.n_control(0); w += 1)
     {
-        gsVector3d<double> path_pt = path.control[w];
+        gsVector3d<float> path_pt = path.control[w];
 
         std::array<size_t, dimension> indices{};
         bool done = false;
@@ -32,7 +32,7 @@ nurbs<dimension + 1> nurbs<dimension>::sweep(const nurbs<1> &path) const
 
             sweep.control.push_back(control[idx] + path_pt);
 
-            double wgt = (weight.empty() ? 1.0 : weight[idx]) *
+            float wgt = (weight.empty() ? 1.0 : weight[idx]) *
                          (path.weight.empty() ? 1.0 : path.weight[w]);
             sweep.weight.push_back(wgt);
 

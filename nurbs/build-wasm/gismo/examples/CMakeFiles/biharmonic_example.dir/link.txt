@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/biharmonic_example.dir/objects1.rsp -o ../bin/biharmonic_example.js @CMakeFiles/biharmonic_example.dir/linkLibs.rsp

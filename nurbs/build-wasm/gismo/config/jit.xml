@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file was created by G+Smo 25.07.0-->
+<xml>
+ <JITCompilerConfig cmd="/opt/homebrew/Cellar/emscripten/4.0.20/libexec/emcc"
+                    flags="-O3 -DNDEBUG  -shared -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/optional -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src  -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo "
+                    lang="c"
+                    out="-o "
+                    temp=""
+                    id="0"/>
+ 
+ <JITCompilerConfig cmd="/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++"
+                    flags="-O3 -DNDEBUG -fexceptions -shared -std=c++14 -fPIC -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/optional -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src  -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo "
+                    lang="cxx"
+                    out="-o "
+                    temp=""
+                    id="1"/>
+
+  <JITCompilerConfig cmd=""
+                    flags="-O3 -DNDEBUG -fexceptions -shared -std=c++14 -fPIC   "
+                    lang="cu"
+                    out="-o "
+                    temp=""
+                    id="2"/>
+
+   <JITCompilerConfig cmd=""
+                    flags="  -shared -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/optional -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src  -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo "
+                    lang="F95"
+                    out="-o "
+                    temp=""
+                    id="3"/>
+</xml>

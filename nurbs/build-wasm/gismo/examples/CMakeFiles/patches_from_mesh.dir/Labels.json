@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/examples/patches_from_mesh.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"examples"
+		],
+		"name" : "patches_from_mesh"
+	}
+}

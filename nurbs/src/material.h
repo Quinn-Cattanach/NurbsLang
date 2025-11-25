@@ -4,8 +4,8 @@
 
 struct material
 {
-    double youngs_modulus_Pa;
-    double poisson_ratio;
+    float youngs_modulus_Pa;
+    float poisson_ratio;
 };
 
 extern material Aluminum;

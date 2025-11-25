@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/examples/gsAdaptiveMeshing_example.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"examples"
+		],
+		"name" : "gsAdaptiveMeshing_example"
+	}
+}

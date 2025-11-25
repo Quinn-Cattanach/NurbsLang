@@ -15,12 +15,12 @@ struct boundary_condition
     {
         struct
         {
-            double value;
+            float value;
         } dirichlet;
 
         struct
         {
-            gsVector3d<double> normal_derivative;
+            gsVector3d<float> normal_derivative;
         } neumann;
 
     } parameter;

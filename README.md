@@ -1,11 +1,16 @@
 
 # NurbsLang
 
-Build with cmake. You will need to install gismo with homebrew first.
+## Dependencies
 
+This project assumes you are using homebrew on macos. These are the dependencies you must install:
+
+For native cpp compillation,
 ```
 brew install gismo
 ```
+
+
 
 then
 

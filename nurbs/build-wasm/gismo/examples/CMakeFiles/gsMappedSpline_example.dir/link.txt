@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/gsMappedSpline_example.dir/objects1.rsp -o ../bin/gsMappedSpline_example.js @CMakeFiles/gsMappedSpline_example.dir/linkLibs.rsp

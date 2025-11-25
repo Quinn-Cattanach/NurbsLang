@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/knotVector_example.dir/objects1.rsp -o ../bin/knotVector_example.js @CMakeFiles/knotVector_example.dir/linkLibs.rsp

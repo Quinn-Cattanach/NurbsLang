@@ -1,0 +1,6 @@
+# Directory labels
+ doc-snippets
+# Source files and their labels
+/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_greville_out
+/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_greville_out.rule
+/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/bspline_greville.out.rule

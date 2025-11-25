@@ -1,4 +1,6 @@
 /gismo/
 /nurbs/build/
+/nurbs/gismo/
+/nurbs/emsdk/
 
 .DS_Store

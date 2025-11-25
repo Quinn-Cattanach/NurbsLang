@@ -1,0 +1,3 @@
+/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/CMakeFiles/nurbs.dir
+/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/CMakeFiles/edit_cache.dir
+/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/CMakeFiles/rebuild_cache.dir

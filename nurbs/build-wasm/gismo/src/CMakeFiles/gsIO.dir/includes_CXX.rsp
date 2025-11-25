@@ -1,0 +1,1 @@
+-I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/src -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external -I"/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo" -I/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/optional

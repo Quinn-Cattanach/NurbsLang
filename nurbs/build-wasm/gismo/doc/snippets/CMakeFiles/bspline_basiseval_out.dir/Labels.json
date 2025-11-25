@@ -1,0 +1,22 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_basiseval_out"
+		},
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_basiseval_out.rule"
+		},
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/bspline_basiseval.out.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"doc-snippets"
+		],
+		"name" : "bspline_basiseval_out"
+	}
+}

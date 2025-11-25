@@ -8,7 +8,7 @@
 #include <string>
 #include <optional>
 #include <fstream>
-#include <gismo/gismo.h>
+#include <gismo.h>
 
 using namespace gismo;
 

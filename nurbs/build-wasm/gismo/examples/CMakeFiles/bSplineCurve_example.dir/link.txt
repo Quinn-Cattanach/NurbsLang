@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/bSplineCurve_example.dir/objects1.rsp -o ../bin/bSplineCurve_example.js @CMakeFiles/bSplineCurve_example.dir/linkLibs.rsp

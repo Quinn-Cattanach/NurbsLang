@@ -1,0 +1,22 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_vecxmat_out"
+		},
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_vecxmat_out.rule"
+		},
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/bspline_vecxmat.out.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"doc-snippets"
+		],
+		"name" : "bspline_vecxmat_out"
+	}
+}

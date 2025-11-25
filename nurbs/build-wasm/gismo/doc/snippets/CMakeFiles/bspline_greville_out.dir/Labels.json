@@ -1,0 +1,22 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_greville_out"
+		},
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_greville_out.rule"
+		},
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/bspline_greville.out.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"doc-snippets"
+		],
+		"name" : "bspline_greville_out"
+	}
+}

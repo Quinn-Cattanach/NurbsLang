@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/fitting_mspline.dir/objects1.rsp -o ../bin/fitting_mspline.js @CMakeFiles/fitting_mspline.dir/linkLibs.rsp

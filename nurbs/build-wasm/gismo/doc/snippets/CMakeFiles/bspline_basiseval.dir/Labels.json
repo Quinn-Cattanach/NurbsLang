@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/bspline_basiseval.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"doc-snippets"
+		],
+		"name" : "bspline_basiseval"
+	}
+}

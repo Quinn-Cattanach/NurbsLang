@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/bspline_vecxmat.dir/objects1.rsp -o ../../bin/bspline_vecxmat.js @CMakeFiles/bspline_vecxmat.dir/linkLibs.rsp

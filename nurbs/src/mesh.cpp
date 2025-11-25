@@ -1,15 +1,15 @@
 #include "nurbs_include.h"
 
-static gsVector3d<double> compute_normal(
-    const gsVector3d<double> &a,
-    const gsVector3d<double> &b,
-    const gsVector3d<double> &c)
+static gsVector3d<float> compute_normal(
+    const gsVector3d<float> &a,
+    const gsVector3d<float> &b,
+    const gsVector3d<float> &c)
 {
     auto n = (b - a).cross(c - a);
 
-    double modulus = n.norm();
+    float modulus = n.norm();
 
-    return (modulus > 1e-12) ? (n / modulus) : gsVector3d<double>(0.0, 0.0, 0.0);
+    return (modulus > 1e-12) ? (n / modulus) : gsVector3d<float>(0.0, 0.0, 0.0);
 }
 
 void mesh::append(const mesh &other)
@@ -39,29 +39,29 @@ void mesh::to_stl(const std::string &filename) const
 
         auto n = compute_normal(a, b, c);
 
-        float nf[3] = {static_cast<float32_t>(n[0]), static_cast<float32_t>(n[1]), static_cast<float32_t>(n[2])};
+        float nf[3] = {static_cast<float>(n[0]), static_cast<float>(n[1]), static_cast<float>(n[2])};
 
-        out.write(reinterpret_cast<char *>(nf), 3 * sizeof(float32_t));
+        out.write(reinterpret_cast<char *>(nf), 3 * sizeof(float));
 
         float v[3][3] = {
             {
-                static_cast<float32_t>(a[0]),
-                static_cast<float32_t>(a[1]),
-                static_cast<float32_t>(a[2]),
+                static_cast<float>(a[0]),
+                static_cast<float>(a[1]),
+                static_cast<float>(a[2]),
             },
             {
-                static_cast<float32_t>(b[0]),
-                static_cast<float32_t>(b[1]),
-                static_cast<float32_t>(b[2]),
+                static_cast<float>(b[0]),
+                static_cast<float>(b[1]),
+                static_cast<float>(b[2]),
             },
             {
-                static_cast<float32_t>(c[0]),
-                static_cast<float32_t>(c[1]),
-                static_cast<float32_t>(c[2]),
+                static_cast<float>(c[0]),
+                static_cast<float>(c[1]),
+                static_cast<float>(c[2]),
             },
         };
 
-        out.write(reinterpret_cast<char *>(v), 9 * sizeof(float32_t));
+        out.write(reinterpret_cast<char *>(v), 9 * sizeof(float));
 
         uint16_t attribute = 0;
         out.write(reinterpret_cast<char *>(&attribute), sizeof(uint16_t));

@@ -1,0 +1,21 @@
+external/zlib/CMakeFiles/zlib.dir/uncompr.c.o: \
+  /Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external/zlib/uncompr.c \
+  /Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external/zlib/zlib.h \
+  /Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/external/zlib/zconf.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/limits.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/limits.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/features.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/bits/alltypes.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/bits/limits.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/sys/types.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/endian.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/sys/select.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/compat/stdarg.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/stdarg.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/cache/sysroot/include/stdarg.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/__stdarg_header_macro.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/__stdarg___gnuc_va_list.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/__stdarg_va_list.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/__stdarg_va_arg.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/__stdarg___va_copy.h \
+  /opt/homebrew/Cellar/emscripten/4.0.20/libexec/llvm/lib/clang/22/include/__stdarg_va_copy.h

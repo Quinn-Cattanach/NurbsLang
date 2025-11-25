@@ -5,24 +5,24 @@ template <size_t dimension>
 struct nurbs
 {
     std::array<size_t, dimension> degree;
-    std::array<std::vector<double>, dimension> knot;
-    std::vector<gsVector3d<double>> control;
-    std::vector<double> weight;
+    std::array<std::vector<float>, dimension> knot;
+    std::vector<gsVector3d<float>> control;
+    std::vector<float> weight;
 
-    int evaluate(const std::array<double, dimension> &param, gsVector3d<double> *result) const;
+    int evaluate(const std::array<float, dimension> &param, gsVector3d<float> *result) const;
 
     int bend(
         size_t param_dim,
-        double param_value,
-        double angle,
-        double radius);
+        float param_value,
+        float angle,
+        float radius);
 
     nurbs<dimension + 1> sweep(const nurbs<1> &path) const;
 
     std::optional<mesh> tessellate(
         size_t lod_u, size_t lod_v,
         size_t index_u, size_t index_v,
-        std::array<double, dimension> defaults) const;
+        std::array<float, dimension> defaults) const;
 
     void to_stl(const std::array<size_t, dimension> &lods, std::string filename) const;
 
@@ -46,5 +46,5 @@ private:
         return idx;
     }
 
-    double basis(size_t dim, size_t index, double x, size_t deg) const;
+    float basis(size_t dim, size_t index, float x, size_t deg) const;
 };

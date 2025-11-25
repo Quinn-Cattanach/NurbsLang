@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/examples/inputOutput_example.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"examples"
+		],
+		"name" : "inputOutput_example"
+	}
+}

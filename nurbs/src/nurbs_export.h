@@ -6,7 +6,7 @@ template <size_t dimension>
 void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods, std::string filename) const
 {
     mesh result;
-    std::array<double, dimension> defaults = {0x00};
+    std::array<float, dimension> defaults = {0x00};
 
     for (size_t idx1 = 0; idx1 < dimension; idx1 += 1)
     {
@@ -34,7 +34,7 @@ void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods, std::st
                 for (size_t f = 0; f < num_fixed; f += 1)
                 {
                     size_t fixed_dim = fixed_indices[f];
-                    double boundary = (combo & (1 << f)) ? 1.0 : 0.0;
+                    float boundary = (combo & (1 << f)) ? 1.0 : 0.0;
                     defaults[fixed_dim] = boundary;
                 }
 
@@ -45,7 +45,7 @@ void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods, std::st
 
                     // This is just to make sure that the normals look right. I mean, we can just disable culling but for stl export this is nice.
 
-                    gsVector3d<double> outward(0.0, 0.0, 0.0);
+                    gsVector3d<float> outward(0.0, 0.0, 0.0);
                     for (size_t f = 0; f < num_fixed; f += 1)
                     {
                         size_t fixed_dim = fixed_indices[f];
@@ -90,7 +90,7 @@ static inline void write_vertex(
     int offset,
     size_t n_tri_x,
     size_t n_tri_y,
-    const gsVector3d<double> &v,
+    const gsVector3d<float> &v,
     mesh &result)
 {
     if (in_bounds(tri_x, tri_y, n_tri_x, n_tri_y))
@@ -104,7 +104,7 @@ template <size_t dimension>
 std::optional<mesh> nurbs<dimension>::tessellate(
     size_t lod_u, size_t lod_v,
     size_t index_u, size_t index_v,
-    std::array<double, dimension> defaults) const
+    std::array<float, dimension> defaults) const
 {
     if (lod_u < 2 || lod_v < 2)
         return std::nullopt;
@@ -114,22 +114,22 @@ std::optional<mesh> nurbs<dimension>::tessellate(
     mesh result;
     int n_tri_x = int(2 * (lod_u - 1));
     int n_tri_y = int(lod_v - 1);
-    size_t total_vertices = 3ull * size_t(n_tri_x * n_tri_y);
+    size_t total_vertices = 3 * size_t(n_tri_x * n_tri_y);
     result.vertices.resize(total_vertices);
 
-    for (double u_index = 0.0; u_index < lod_u; u_index += 1.0)
+    for (float u_index = 0.0; u_index < lod_u; u_index += 1.0)
     {
-        for (double v_index = 0.0; v_index < lod_v; v_index += 1.0)
+        for (float v_index = 0.0; v_index < lod_v; v_index += 1.0)
         {
-            std::array<double, dimension> param;
+            std::array<float, dimension> param;
 
             for (size_t d = 0; d < dimension; d += 1)
                 param[d] = defaults[d];
 
-            param[index_u] = u_index / double(lod_u - 1);
-            param[index_v] = v_index / double(lod_v - 1);
+            param[index_u] = u_index / float(lod_u - 1);
+            param[index_v] = v_index / float(lod_v - 1);
 
-            gsVector3d<double> evaluation;
+            gsVector3d<float> evaluation;
             this->evaluate(param, &evaluation);
 
             int tri_x = int(u_index) * 2;

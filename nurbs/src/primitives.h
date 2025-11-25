@@ -3,7 +3,7 @@
 #include "nurbs_include.h"
 
 template <size_t dimension>
-nurbs<dimension> Hyperbox(const std::array<double, dimension> &sizes)
+nurbs<dimension> hyperbox(const std::array<float, dimension> &sizes)
 {
     nurbs<dimension> h;
 
@@ -20,10 +20,13 @@ nurbs<dimension> Hyperbox(const std::array<double, dimension> &sizes)
 
     for (size_t idx = 0; idx < num_ctrl; idx += 1)
     {
-        double coords[3] = {0.0, 0.0, 0.0};
+        float coords[3] = {0.0, 0.0, 0.0};
 
         for (size_t d = 0; d < dimension; d += 1)
-            coords[d] = (idx >> d) & 1 ? sizes[d] : 0.0;
+        {
+            d = d % 3;
+            coords[d] += (idx >> d) & 1 ? sizes[d] : 0.0;
+        }
         // ^^ this is just for alternating inf/sup
 
         h.control.emplace_back(coords[0], coords[1], coords[2]);
@@ -33,5 +36,6 @@ nurbs<dimension> Hyperbox(const std::array<double, dimension> &sizes)
     return h;
 }
 
-nurbs<2> Rectangle(double width, double height);
-nurbs<3> Box(double width, double height, double depth);
+nurbs<1> line(float length, gsVector3d<float> direction);
+nurbs<2> rectangle(float width, float height);
+nurbs<3> box(float width, float height, float depth);

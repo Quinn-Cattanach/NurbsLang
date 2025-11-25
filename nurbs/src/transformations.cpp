@@ -4,9 +4,9 @@
 template <>
 int nurbs<3>::bend(
     size_t param_dim,
-    double param_value,
-    double angle,
-    double radius)
+    float param_value,
+    float angle,
+    float radius)
 {
     if (param_dim > 2)
         return -1;
