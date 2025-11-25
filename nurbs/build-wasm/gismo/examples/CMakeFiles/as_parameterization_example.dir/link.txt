@@ -1,1 +1,0 @@
-/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/as_parameterization_example.dir/objects1.rsp -o ../bin/as_parameterization_example.js @CMakeFiles/as_parameterization_example.dir/linkLibs.rsp

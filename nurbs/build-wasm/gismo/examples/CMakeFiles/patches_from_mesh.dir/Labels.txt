@@ -1,4 +1,0 @@
-# Directory labels
- examples
-# Source files and their labels
-/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/examples/patches_from_mesh.cpp

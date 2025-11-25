@@ -1,1 +1,0 @@
-/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/L2projection_example.dir/objects1.rsp -o ../bin/L2projection_example.js @CMakeFiles/L2projection_example.dir/linkLibs.rsp

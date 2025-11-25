@@ -1,5 +1,0 @@
-# Target labels
- examples
-# Directory labels
- examples
-# Source files and their labels

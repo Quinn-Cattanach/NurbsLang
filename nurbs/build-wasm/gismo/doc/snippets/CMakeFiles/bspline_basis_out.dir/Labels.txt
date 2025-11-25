@@ -1,6 +1,0 @@
-# Directory labels
- doc-snippets
-# Source files and their labels
-/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_basis_out
-/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/CMakeFiles/bspline_basis_out.rule
-/Users/quinncattanach/classes/domain_specific_language/NurbsLang/nurbs/build-wasm/gismo/doc/snippets/bspline_basis.out.rule

@@ -2,5 +2,7 @@
 /nurbs/build/
 /nurbs/gismo/
 /nurbs/emsdk/
+/nurbs/build-wasm/
+/nurbs/build-native/
 
 .DS_Store

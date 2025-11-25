@@ -1,1 +1,0 @@
-/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/basis_example.dir/objects1.rsp -o ../bin/basis_example.js @CMakeFiles/basis_example.dir/linkLibs.rsp

@@ -1,1 +1,0 @@
-/opt/homebrew/Cellar/emscripten/4.0.20/libexec/em++ -fexceptions -O3 -DNDEBUG @CMakeFiles/patches_from_mesh.dir/objects1.rsp -o ../bin/patches_from_mesh.js @CMakeFiles/patches_from_mesh.dir/linkLibs.rsp
