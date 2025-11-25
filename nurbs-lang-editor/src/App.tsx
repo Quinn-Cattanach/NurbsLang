@@ -1,7 +1,7 @@
 import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
 import { initializeLanguage } from "./language";
-import Module from "../../nurbs/build-wasm/nurbs.js";
+// import Module from "../../nurbs/build-wasm/nurbs.js";
 
 const defaultProgram = `
 // An L Bracket
@@ -41,6 +41,7 @@ export const App = () => {
                     theme="light"
                     beforeMount={handleEditorWillMount}
                     options={{
+                        scrollBeyondLastLine: false,
                         automaticLayout: true,
                         minimap: { enabled: false },
                     }}

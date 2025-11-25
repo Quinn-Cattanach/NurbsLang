@@ -42,9 +42,7 @@ int main(int argc, char *argv[])
 
     nurbs<3> result = curved_surface.sweep(extrude_path);
 
-    nurbs<4> floatit = result.sweep(extrude_path);
-
-    floatit.to_stl({20, 20, 20, 20}, "sample_volume.stl");
+    result.to_stl({20, 20, 20}, "sample_volume.stl");
 
     std::cout << "Hello\n";
 
