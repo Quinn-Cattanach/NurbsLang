@@ -4,19 +4,19 @@
 ## Dependencies
 
 This project assumes you are using homebrew on macos. These are the dependencies you must install:
-
-For native cpp compillation,
 ```
 brew install gismo
+brew install emscripten
 ```
 
+## Compilation
 
-
-then
-
+To compile the library, run:
 ```
 cd nurbs
-mkdir build
-cmake ..
-make
+chmod +x ./build.sh
+./build.sh
+./build.sh wasm
 ```
+
+Passing the `wasm` argument will build for wasm. This requires the gismo submodule at root.
