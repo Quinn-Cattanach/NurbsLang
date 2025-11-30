@@ -21,7 +21,3 @@ using namespace gismo;
 #include "nurbs_operations.h"
 #include "nurbs_evaluate.h"
 #include "nurbs_export.h"
-
-#include "construct.h"
-#include "fea.h"
-#include "optimization.h"

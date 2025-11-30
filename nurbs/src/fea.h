@@ -21,7 +21,7 @@ struct fea_result {
 // Main FEA function - analyzes a 3D NURBS solid
 fea_result run_fea(
     const nurbs<3>& geometry,
-    const std::vector<n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const material& mat
 );
 
@@ -30,7 +30,7 @@ gsMultiPatch<real_t> nurbs_to_gismo(const nurbs<3>& geom);
 
 // Helper: Apply boundary conditions to G+Smo boundary conditions object
 void apply_boundary_conditions(
-    const std::vector<n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const gsMultiPatch<real_t>& mp,
     gsBoundaryConditions<real_t>& bc_gismo
 );

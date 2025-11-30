@@ -7,7 +7,7 @@
 // Evaluate objective function for given variable values
 float evaluate_objective(
     const std::vector<operation>& construction,
-    const std::vector<construct::n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const material& mat,
     objective_fn_t objective,
     const std::unordered_map<std::string, float>& var_values
@@ -36,7 +36,7 @@ float evaluate_objective(
 // Simple grid search optimization (exhaustive but works)
 optimization_result optimize_grid_search(
     const std::vector<operation>& construction,
-    const std::vector<construct::n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const material& mat,
     objective_fn_t objective,
     std::unordered_map<std::string, variable>& variables,
@@ -105,7 +105,7 @@ optimization_result optimize_grid_search(
 // Main optimization function (choose algorithm based on problem size)
 optimization_result optimize(
     const std::vector<operation>& construction,
-    const std::vector<construct::n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const material& mat,
     objective_fn_t objective,
     std::unordered_map<std::string, variable>& variables

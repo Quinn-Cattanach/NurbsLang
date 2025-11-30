@@ -1,8 +1,5 @@
 #include "fea.h"
-#include <gsCore/gsMultiPatch.h>
-#include <gsCore/gsBasis.h>
-#include <gsPde/gsPoissonAssembler.h>
-#include <gsMatrix/gsSparseSolver.h>
+#include <gismo.h> 
 #include <cmath>
 #include <limits>
 
@@ -57,7 +54,7 @@ gsMultiPatch<real_t> nurbs_to_gismo(const nurbs<3>& geom) {
 
 // Apply boundary conditions to G+Smo format
 void apply_boundary_conditions(
-    const std::vector<construct::n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const gsMultiPatch<real_t>& mp,
     gsBoundaryConditions<real_t>& bc_gismo
 ) {
@@ -81,14 +78,14 @@ void apply_boundary_conditions(
             continue;
         }
         
-        if (bc.type == construct::n_boundary_condition::DIRICHLET) {
+        if (bc.type == bc::n_boundary_condition::DIRICHLET) {
             // Add Dirichlet BC for all components (0, 1, 2 = x, y, z)
             for (int component = 0; component < 3; ++component) {
                 auto zero_func = std::make_shared<gsConstantFunction<real_t>>(0.0, 3);
                 bc_gismo.addCondition(0, side, condition_type::dirichlet, zero_func, component);
             }
         } 
-        else if (bc.type == construct::n_boundary_condition::NEUMANN) {            
+        else if (bc.type == bc::n_boundary_condition::NEUMANN) {            
             // Neumann BC represents traction (force per unit area)
             for (int component = 0; component < 3; ++component) {
                 float force_component = bc.parameter.neumann.derivative[component];
@@ -199,7 +196,7 @@ float find_max_displacement(const std::vector<vec3f_wgsl>& displacement_field) {
 }
 
 // Main FEA function
-fea_result run_fea(const nurbs<3>& geometry, const std::vector<construct::n_boundary_condition>& bcs, const material& mat) {
+fea_result run_fea(const nurbs<3>& geometry, const std::vector<bc::n_boundary_condition>& bcs, const material& mat) {
     fea_result result;
     result.success = false;
     try {

@@ -18,7 +18,7 @@ struct optimization_result {
 // Run optimization to minimize objective
 optimization_result optimize(
     const std::vector<operation>& construction,
-    const std::vector<construct::n_boundary_condition>& bcs,
+    const std::vector<bc::n_boundary_condition>& bcs,
     const material& mat,
     objective_fn_t objective,
     std::unordered_map<std::string, variable>& variables

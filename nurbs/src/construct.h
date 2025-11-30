@@ -16,7 +16,7 @@ typedef struct {
 } range_t;
 
 // Boundary condition structure
-namespace construct {
+namespace bc {
 struct n_boundary_condition {
     enum {
         DIRICHLET,
