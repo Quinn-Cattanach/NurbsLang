@@ -37,5 +37,6 @@ nurbs<dimension> hyperbox(const std::array<float, dimension> &sizes)
 }
 
 nurbs<1> line(float length, vec3f_wgsl direction);
+nurbs<1> arc(float radius, float angle, vec3f_wgsl center, vec3f_wgsl start_dir, vec3f_wgsl normal);
 nurbs<2> rectangle(float width, float height);
 nurbs<3> box(float width, float height, float depth);

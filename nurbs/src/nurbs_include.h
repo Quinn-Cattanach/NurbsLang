@@ -17,8 +17,11 @@ using namespace gismo;
 #include "primitives.h"
 #include "transformations.h"
 #include "material.h"
-#include "boundary.h"
 
 #include "nurbs_operations.h"
 #include "nurbs_evaluate.h"
 #include "nurbs_export.h"
+
+#include "construct.h"
+#include "fea.h"
+#include "optimization.h"
