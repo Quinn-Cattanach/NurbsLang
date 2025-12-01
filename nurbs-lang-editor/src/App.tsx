@@ -11,25 +11,29 @@ import { transpileDSL } from "./transpile";
 // import Module from "../../nurbs/build-wasm/nurbs.js";
 //
 const defaultProgram = `
-// An L Bracket
-component LBracket(radius: [0, 2]) {
-    const startDirection = vec(x: 1, y: 0, z: 0);
-    const endDirection = vec(x: 1, y: 1, z: 0);
 
-    const path = BentLine(length: 20, bendOrigin: 0.5, startDirection /* same name as param no need for name:name */, endDirection);
+    // An L Bracket
+    component LBracket(radius: [0, 2]) {
+        const startDirection = vec(x: 1, y: 0, z: 0);
+        const endDirection = vec(x: 1, y: 1, z: 0);
 
-    return Rectangle(u: 5, v: 1).sweep(path);
-}
+        const path = BentLine(length: 20, bendOrigin: 0.5, startDirection /* same name as param no need for name:name */, endDirection);
 
-// Simulated as aluminum fixed to a wall with a load.
-// LBracket.minimize({
-//     objective: MaxStress,
-//     material: Aluminum,
-//     boundaryConditions: [
-//         Directional(direction: -w, condition: Dirichlet(0)),
-//         Directional(direction: u, condition: Neumann(500 * -w)),
-//     ],
-// });
+        return Rectangle(u: 5, v: 1).sweep(path);
+    }
+
+    LBracket(radius: 2).show();
+
+    // Simulated as aluminum fixed to a wall with a load.
+    // LBracket.minimize({
+    //     objective: MaxStress,
+    //     material: Aluminum,
+    //     boundaryConditions: [
+    //         Directional(direction: -w, condition: Dirichlet(0)),
+    //         Directional(direction: u, condition: Neumann(500 * -w)),
+    //     ],
+    // });
+
 
 `;
 
@@ -65,7 +69,13 @@ export const App = () => {
                 if (code && module) {
                     const jscode = transpileDSL(code);
                     console.log(jscode);
-                    const wrapper = makeNurbsModuleWrappers(module);
+                    const wrappers = makeNurbsModuleWrappers(
+                        module,
+                        (ptr: Nurbs3Ptr) => {
+                            console.log("showing", ptr);
+                            setVolume(ptr);
+                        },
+                    );
                     eval(jscode);
                 }
 

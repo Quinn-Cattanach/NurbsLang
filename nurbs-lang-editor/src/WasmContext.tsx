@@ -39,40 +39,65 @@ export type NurbsModuleRaw = {
     HEAP8: Int8Array;
 };
 
-export function makeNurbsModuleWrappers(module: NurbsModuleRaw) {
+export function makeNurbsModuleWrappers(
+    module: NurbsModuleRaw,
+    showFunction: (ptr: Nurbs3Ptr) => void,
+) {
+    function make1(ptr: Nurbs1Ptr) {
+        return {
+            ptr,
+        };
+    }
+
+    function make2(ptr: Nurbs2Ptr) {
+        return {
+            ptr,
+            sweep(path: Nurbs1Ptr | { ptr: Nurbs1Ptr }) {
+                console.log("sweeping", ptr, path);
+
+                const pathPtr =
+                    typeof path === "number" ? (path as Nurbs1Ptr) : path.ptr;
+
+                const volPtr = module.sweep2(ptr, pathPtr);
+                return make3(volPtr);
+            },
+        };
+    }
+
+    function make3(ptr: Nurbs3Ptr) {
+        return {
+            ptr,
+            show() {
+                console.log("Showing", ptr);
+                showFunction(ptr);
+            },
+        };
+    }
     return {
-        Line: ({
-            length,
-            x,
-            y,
-            z,
-        }: {
-            length: number;
-            x: number;
-            y: number;
-            z: number;
-        }) => module.Line(length, x, y, z),
+        Line({ length, x, y, z }: any) {
+            return make1(module.Line(length, x, y, z));
+        },
 
-        Rectangle: ({ u, v }: { u: number; v: number }) =>
-            module.Rectangle(u, v),
+        Rectangle({ u, v }: any) {
+            console.log("constructing line u", u, "v", v);
+            return make2(module.Rectangle(u, v));
+        },
 
-        Box: ({ u, v, w }: { u: number; v: number; w: number }) =>
-            module.Box(u, v, w),
+        Box({ u, v, w }: any) {
+            return make3(module.Box(u, v, w));
+        },
 
-        BentLine: ({
+        BentLine({
             length,
             bendOrigin,
             radius,
             startDirection,
             endDirection,
-        }: {
-            length: number;
-            bendOrigin: number;
-            radius: number;
-            startDirection: { x: number; y: number; z: number };
-            endDirection: { x: number; y: number; z: number };
-        }) =>
-            module.BentLine(
+        }: any) {
+            console.log(
+                `constructing bent line ${length}, ${bendOrigin}, ${radius}, ${startDirection}, ${endDirection}`,
+            );
+            const ptr = module.BentLine(
                 length,
                 bendOrigin,
                 radius,
@@ -82,10 +107,9 @@ export function makeNurbsModuleWrappers(module: NurbsModuleRaw) {
                 endDirection.x,
                 endDirection.y,
                 endDirection.z,
-            ),
-
-        sweep2: ({ tool, path }: { tool: Nurbs2Ptr; path: Nurbs1Ptr }) =>
-            module.sweep2(tool, path),
+            );
+            return make1(ptr);
+        },
     };
 }
 
