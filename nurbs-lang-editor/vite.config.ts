@@ -12,7 +12,7 @@ export default defineConfig({
             },
         }),
     ],
-    base: "NurbsLang",
+    base: "/NurbsLang",
     build: {
         outDir: "../docs",
     },
