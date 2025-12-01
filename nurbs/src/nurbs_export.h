@@ -3,9 +3,9 @@
 #include "nurbs.h"
 
 template <size_t dimension>
-void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods,
-                              std::string filename) const {
-  mesh result;
+mesh *
+nurbs<dimension>::to_mesh(const std::array<size_t, dimension> &lods) const {
+  mesh *result = new mesh;
   std::array<float, dimension> defaults = {0x00};
 
   for (size_t idx1 = 0; idx1 < dimension; idx1 += 1) {
@@ -39,28 +39,29 @@ void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods,
           // This is just to make sure that the normals look right. I mean, we
           // can just disable culling but for stl export this is nice.
 
-          vec3f_wgsl outward(0.0, 0.0, 0.0);
-          for (size_t f = 0; f < num_fixed; f += 1) {
-            size_t fixed_dim = fixed_indices[f];
-            if (fixed_dim % 3 == 0) {
-              outward.x = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
-            } else if (fixed_dim % 3 == 1) {
-              outward.y = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
-            } else {
-              outward.z = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
-            }
-          }
+          // vec3f_wgsl outward(0.0, 0.0, 0.0);
+          // for (size_t f = 0; f < num_fixed; f += 1) {
+          //   size_t fixed_dim = fixed_indices[f];
+          //   if (fixed_dim % 3 == 0) {
+          //     outward.x = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
+          //   } else if (fixed_dim % 3 == 1) {
+          //     outward.y = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
+          //   } else {
+          //     outward.z = (defaults[fixed_dim] == 0.0) ? -1.0 : 1.0;
+          //   }
+          // }
 
-          for (size_t t = 0; t < face_mesh.vertices.size(); t += 3) {
-            auto a = face_mesh.vertices[t + 0];
-            auto b = face_mesh.vertices[t + 1];
-            auto c = face_mesh.vertices[t + 2];
-            auto n = (b - a).cross(c - a);
-            if (n.dot(outward) < 0.0)
-              std::swap(face_mesh.vertices[t + 1], face_mesh.vertices[t + 2]);
-          }
+          // for (size_t t = 0; t < face_mesh.vertices.size(); t += 3) {
+          //   auto a = face_mesh.vertices[t + 0];
+          //   auto b = face_mesh.vertices[t + 1];
+          //   auto c = face_mesh.vertices[t + 2];
+          //   auto n = (b - a).cross(c - a);
+          //   if (n.dot(outward) < 0.0)
+          //     std::swap(face_mesh.vertices[t + 1], face_mesh.vertices[t +
+          //     2]);
+          // }
 
-          result.append(face_mesh);
+          result->append(face_mesh);
         }
       }
 
@@ -69,8 +70,15 @@ void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods,
       }
     }
   }
+  return result;
+}
 
-  result.to_stl(filename);
+template <size_t dimension>
+void nurbs<dimension>::to_stl(const std::array<size_t, dimension> &lods,
+                              std::string filename) const {
+  mesh *result = to_mesh(lods);
+  result->to_stl(filename);
+  delete result;
 }
 
 static inline bool in_bounds(int x, int y, int sx, int sy) {

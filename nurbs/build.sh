@@ -31,6 +31,20 @@ if [[ "$BUILD_TYPE" == "wasm" ]]; then
 
     emcmake cmake "$PROJECT_ROOT" -DCMAKE_BUILD_TYPE=Release
     emmake make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+
+    # --- NEW: Copy artifacts to external folder ---
+    TARGET_DIR="$PROJECT_ROOT/../nurbs-lang-editor/public/external"
+
+    echo -e "${YELLOW}Copying WASM artifacts to: $TARGET_DIR${NC}"
+
+    # Create the directory if it doesn't exist
+    mkdir -p "$TARGET_DIR"
+
+    # Copy generated .wasm and .js files
+    # We use || true to prevent script failure if no files are found (though they should be there)
+    cp *.wasm *.js "$TARGET_DIR/" || echo -e "${RED}Warning: No .wasm/.js files found to copy.${NC}"
+    # ----------------------------------------------
+
 else
     echo -e "${GREEN}Building for native platform...${NC}"
 
