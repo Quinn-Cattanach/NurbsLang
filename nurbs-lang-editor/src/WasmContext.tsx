@@ -144,7 +144,7 @@ export const WasmContextProvider = ({ children }: ProviderProps) => {
 
     useEffect(() => {
         const script = document.createElement("script");
-        script.src = "./external/nurbs.js";
+        script.src = "/external/nurbs.js";
         script.async = true;
         script.onload = () => {
             // window.Module is injected by Emscripten
