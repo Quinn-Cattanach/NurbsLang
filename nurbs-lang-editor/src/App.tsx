@@ -82,10 +82,8 @@ export const App = () => {
                         },
                     );
                     eval(jscode);
+                    wrappers.Box({ u: 10, v: 10, w: 10 });
                 }
-
-                // TODO: convert to js and then need to eval() the js.
-                // need to make sure the module is loaded properly so i might wrap in like another module wrapper in the scope of the eval.
             }
         };
 

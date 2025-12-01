@@ -243,7 +243,7 @@ LBracket.minimize({
 const EditorApp = () => {
     return (
         <iframe
-            src="https://143.215.109.147:5173/index.html"
+            src="https://quinn-cattanach.github.io/NurbsLang/"
             style={{ width: "100%", height: "100%", border: "none" }}
         />
     );
@@ -259,17 +259,12 @@ export const Slide7 = () => {
     return (
         <div className="flex flex-col h-screen w-full">
             {/* Top Section */}
-            <div className="m-16 w-full flex flex-col gap-8">
+            <div className="m-16 w-full flex-col gap-8">
                 <Heading>Demo</Heading>
             </div>
 
-            <div className="w-full flex grow max-h-1/2">
-                <div className="flex-1 h-full flex flex-col gap-2">
-                    <div className="h-150 w-full">
-                        <EditorApp />
-                    </div>
-                    <Button className="ml-auto w-50">Optimize!</Button>
-                </div>
+            <div className="w-full flex-1 mb-20">
+                <EditorApp />
             </div>
         </div>
     );
