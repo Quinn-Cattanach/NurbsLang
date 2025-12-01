@@ -15,17 +15,17 @@ jobs:
                   node-version: 20
 
             - name: Install deps
-              run: |
-                  cd nurbs-lang-editor
-                  npm ci
+              working-directory: ./nurbs-lang-editor
+              run: npm ci
 
             - name: Build
-              run: |
-                  cd nurbs-lang-editor
-                  npm run build
+              working-directory: ./nurbs-lang-editor
+              run: npm run build
 
             - name: Deploy
               uses: peaceiris/actions-gh-pages@v3
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./nurbs-lang-editor/dist
+                  # optional: commit message
+                  commit_message: "Deploy from GH Actions"
