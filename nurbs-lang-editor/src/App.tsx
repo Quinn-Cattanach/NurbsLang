@@ -11,17 +11,21 @@ import { transpileDSL } from "./transpile";
 // import Module from "../../nurbs/build-wasm/nurbs.js";
 //
 const defaultProgram = `
-    // An L Bracket
+// An L Bracket
 component LBracket(radius: [0, 2]) {
     const startDirection = vec(x: 1, y: 0, z: 0);
     const endDirection = vec(x: 1, y: 1, z: 0);
 
-    const path = BentLine(length: 20, bendOrigin: 0.5, radius, startDirection /* same name as param no need for name:name */, endDirection);
+    const path = BentLine(length: 10,
+                          bendOrigin: 0.5,
+                          radius,
+                          startDirection /* same name as param no need for name:name */,
+                          endDirection);
 
     return Rectangle(u: 5, v: 1).sweep(path);
 }
 
-LBracket(radius: 2).show();
+LBracket(radius: 2.5).show();
 
 // Simulated as aluminum fixed to a wall with a load.
 // LBracket.minimize({
