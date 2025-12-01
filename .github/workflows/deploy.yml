@@ -1,8 +1,7 @@
 name: Deploy Vite site to GH Pages
 
 on:
-    push:
-        branches: [main] # or master
+    workflow_dispatch:
 
 jobs:
     build:
