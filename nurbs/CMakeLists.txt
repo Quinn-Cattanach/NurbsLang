@@ -18,13 +18,12 @@ file(GLOB SOURCES "${SRC_DIR}/*.cpp")
 # Detect if we're building for WebAssembly
 if(EMSCRIPTEN)
     message(STATUS "Building for WebAssembly with Emscripten")
-    
-# New location: gismo is one level above nurbs/
-set(GISMO_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../gismo" CACHE PATH "G+Smo source directory")
 
-# Build dir should also be next to gismo
-set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build directory")
+    # New location: gismo is one level above nurbs/
+    set(GISMO_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../gismo" CACHE PATH "G+Smo source directory")
 
+    # Build dir should also be next to gismo
+    set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build directory")
 
     # Check if gismo.h exists
     if(EXISTS "${GISMO_SOURCE_DIR}/src/gismo.h")
@@ -32,7 +31,7 @@ set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build 
     else()
         message(FATAL_ERROR "✗ gismo.h NOT found at ${GISMO_SOURCE_DIR}/src/gismo.h")
     endif()
-    
+
     # Use include_directories() instead of target_include_directories()
     # This applies globally and is more reliable with some toolchains
     # IMPORTANT: Include parent directory of 'src' so that <gismo/gismo.h> resolves correctly
@@ -45,7 +44,7 @@ set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build 
         ${GISMO_BUILD_DIR}
         ${GISMO_BUILD_DIR}/gsCore
     )
-    
+
     # Print include directories for debugging
     message(STATUS "Include directories:")
     message(STATUS "  ${SRC_DIR}")
@@ -54,30 +53,33 @@ set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build 
     message(STATUS "  ${GISMO_SOURCE_DIR}/external/gsEigen")
     message(STATUS "  ${GISMO_BUILD_DIR}")
     message(STATUS "  ${GISMO_BUILD_DIR}/gsCore")
-    
+
     # Add executable
     add_executable(nurbs ${SOURCES})
-    
+
     # Emscripten-specific compiler and linker flags
     set(EMSCRIPTEN_COMPILE_FLAGS
         "-fexceptions"
     )
-    
+
+    # ---------------------------------------------------------
+    # UPDATED LINKER FLAGS BELOW
+    # ---------------------------------------------------------
     set(EMSCRIPTEN_LINK_FLAGS
         "-s WASM=1"
         "-s ALLOW_MEMORY_GROWTH=1"
-        "-s INITIAL_MEMORY=128MB"
-        "-s MAXIMUM_MEMORY=2GB"
         "-s MODULARIZE=1"
         "-s EXPORT_NAME='createNurbsModule'"
-        "-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']"
-        "-s EXPORTED_FUNCTIONS=['_main','_malloc','_free']"
+        # --- FIX: removed malloc/free from this list ---
+        "SHELL:-s EXPORTED_RUNTIME_METHODS=[\"ccall\",\"cwrap\",\"FS\",\"HEAPF32\",\"HEAPU32\",\"HEAP8\"]"
+        # -----------------------------------------------
+        "SHELL:-s EXPORTED_FUNCTIONS=[\"_main\",\"_malloc\",\"_free\"]"
         "-s DISABLE_EXCEPTION_CATCHING=0"
         "-s ASSERTIONS=1"
         "--bind"
         "-fexceptions"
     )
-    
+
     # Optimization flags for release builds
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         list(APPEND EMSCRIPTEN_LINK_FLAGS
@@ -91,17 +93,17 @@ set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build 
             "-g"
         )
     endif()
-    
+
     # Apply Emscripten flags
     target_compile_options(nurbs PRIVATE ${EMSCRIPTEN_COMPILE_FLAGS})
     target_link_options(nurbs PRIVATE ${EMSCRIPTEN_LINK_FLAGS})
-    
+
     # Set output file extensions
     set_target_properties(nurbs PROPERTIES
         SUFFIX ".js"
         OUTPUT_NAME "nurbs"
     )
-    
+
     # Find and link G+Smo library
     if(EXISTS "${GISMO_BUILD_DIR}/lib/libgismo.a")
         message(STATUS "✓ Found libgismo.a at ${GISMO_BUILD_DIR}/lib/libgismo.a")
@@ -109,19 +111,19 @@ set(GISMO_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/gismo" CACHE PATH "G+Smo build 
     else()
         message(FATAL_ERROR "✗ libgismo.a NOT found at ${GISMO_BUILD_DIR}/lib/libgismo.a")
     endif()
-    
+
 else()
     message(STATUS "Building for native platform")
-    
+
     link_directories(/opt/homebrew/lib)
-    
+
     add_executable(nurbs ${SOURCES})
-    
+
     target_include_directories(nurbs PRIVATE
         ${SRC_DIR}
         /opt/homebrew/include
         /opt/homebrew/include/gismo
     )
-    
+
     target_link_libraries(nurbs gismo)
 endif()

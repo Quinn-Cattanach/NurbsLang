@@ -13,6 +13,14 @@ void mesh::append(const mesh &other) {
   vertices.insert(vertices.end(), other.vertices.begin(), other.vertices.end());
 }
 
+void mesh::compute_normals() {
+  normals.resize(vertices.size() / 3);
+  for (size_t triangle = 0; triangle < vertices.size(); triangle += 3) {
+    normals[triangle / 3] = normal(vertices[triangle], vertices[triangle + 1],
+                                   vertices[triangle + 2]);
+  }
+}
+
 void mesh::to_stl(const std::string &filename) const {
   std::ofstream out(filename, std::ios::binary);
 

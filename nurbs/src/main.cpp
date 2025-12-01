@@ -2,49 +2,24 @@
 #include <cmath>
 #include <iostream>
 
-int main(int argc, char *argv[])
-{
-    nurbs<2> curved_surface;
+#ifndef __EMSCRIPTEN__
+int main(int argc, char *argv[]) {
+  nurbs<2> rect = rectangle(5, 1);
 
-    curved_surface.degree[0] = 2;
-    curved_surface.degree[1] = 2;
+  for (int i = 0; i < 10; i += 1) {
+    nurbs<1> path =
+        bent_line(20, 0.0, (float)i, vec3f_wgsl(1, 0, 0), vec3f_wgsl(1, 1, 0));
+    nurbs<3> result1 = rect.sweep(path);
 
-    curved_surface.knot[0] = {0, 0, 0, 1, 1, 1};
-    curved_surface.knot[1] = {0, 0, 0, 1, 1, 1};
+    std::string filename = "sample_volume_r" + std::to_string(i) + ".stl";
+    result1.to_stl({20, 20, 100}, filename);
+  }
 
-    curved_surface.control = {
-        vec3f_wgsl(0, 0, 0),
-        vec3f_wgsl(5, 0, 5),
-        vec3f_wgsl(10, 0, 0),
-
-        vec3f_wgsl(0, 5, -5),
-        vec3f_wgsl(5, 5, 0),
-        vec3f_wgsl(10, 5, 8),
-
-        vec3f_wgsl(0, 10, 0),
-        vec3f_wgsl(5, 10, -5),
-        vec3f_wgsl(10, 10, 0),
-    };
-
-    curved_surface.weight = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-
-    nurbs<1> extrude_path;
-    extrude_path.degree[0] = 2;
-    extrude_path.knot[0] = {0, 0, 0, 1, 1, 1};
-
-    extrude_path.control = {
-        vec3f_wgsl(0, 0, 0),
-        vec3f_wgsl(10, 0, 10),
-        vec3f_wgsl(0, 0, 20),
-    };
-
-    extrude_path.weight = {1.0, 1.0, 1.0};
-
-    nurbs<3> result = curved_surface.sweep(extrude_path);
-
-    result.to_stl({20, 20, 20}, "sample_volume.stl");
-
-    std::cout << "Hello\n";
-
-    return 0;
+  return 0;
 }
+#else
+int main() {
+  std::cout << "The nurbs library was successfully loaded.\n";
+  return 0;
+}
+#endif

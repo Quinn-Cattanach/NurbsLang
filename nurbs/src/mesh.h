@@ -91,8 +91,12 @@ struct vec3f_wgsl {
 
 struct mesh {
   std::vector<vec3f_wgsl> vertices;
+  std::vector<vec3f_wgsl> parametricCoordinates;
+  std::vector<vec3f_wgsl> normals;
 
   void to_stl(const std::string &filename) const;
+
+  void compute_normals();
 
   void append(const mesh &other);
 };

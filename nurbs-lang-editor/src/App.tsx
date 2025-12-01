@@ -1,35 +1,100 @@
 import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { initializeLanguage } from "./language";
+import {
+    makeNurbsModuleWrappers,
+    WasmContext,
+    type Nurbs3Ptr,
+} from "./WasmContext";
+import { NurbsViewer } from "./NurbsViewer";
+import { transpileDSL } from "./transpile";
 // import Module from "../../nurbs/build-wasm/nurbs.js";
-
+//
 const defaultProgram = `
 // An L Bracket
 component LBracket(radius: [0, 2]) {
-    const direction = +x;
-    const origin = vec(0, 0, 0);
+    const startDirection = vec(x: 1, y: 0, z: 0);
+    const endDirection = vec(x: 1, y: 1, z: 0);
 
-    Box(u: 10, v: 3, w: 1).bend(direction, origin);
+    const path = BentLine(length: 10,
+                          bendOrigin: 0.5,
+                          radius,
+                          startDirection /* same name as param no need for name:name */,
+                          endDirection);
+
+    return Rectangle(u: 5, v: 1).sweep(path);
 }
 
-// Simulated as aluminum fixed to a wall with a load.
-LBracket.minimize({
-    objective: MaxStress,
-    material: Aluminum,
-    boundaryConditions: [
-        Directional(direction: -w, condition: Dirichlet(0)),
-        Directional(direction: u, condition: Neumann(500 * -w)),
-    ],
-});
+LBracket(radius: 2.5).show();
 
+// Simulated as aluminum fixed to a wall with a load.
+// LBracket.minimize({
+//     objective: MaxStress,
+//     material: Aluminum,
+//     boundaryConditions: [
+//         Directional(direction: -w, condition: Dirichlet(0)),
+//         Directional(direction: u, condition: Neumann(500 * -w)),
+//     ],
+// });
 `;
 
 export const App = () => {
     const [code, setCode] = useState<string | undefined>(defaultProgram);
 
+    const { module, ready } = useContext(WasmContext);
+
+    const [volume, setVolume] = useState<Nurbs3Ptr | null>(null);
+
+    const codeRef = useRef<string | null>(code);
+
+    useEffect(() => {
+        codeRef.current = code;
+    }, [code]);
+
+    useEffect(() => {
+        console.log("Wasm is ready!!", ready);
+        if (ready && module) {
+            console.log(module);
+
+            const path = module.BentLine(20, 0.5, 4, 1, 0, 0, 1, 1, 0);
+            const face = module.Rectangle(5, 1);
+            setVolume(module.sweep2(face, path));
+        }
+    }, [ready]);
+
     const handleEditorWillMount = (monaco: Monaco) => {
         initializeLanguage(monaco);
     };
+
+    useEffect(() => {
+        const handler = function (e) {
+            // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                e.preventDefault();
+
+                if (codeRef.current && module) {
+                    const jscode = transpileDSL(codeRef.current);
+                    console.log(jscode);
+                    const wrappers = makeNurbsModuleWrappers(
+                        module,
+                        (ptr: Nurbs3Ptr) => {
+                            setVolume(ptr);
+                        },
+                    );
+                    eval(jscode);
+                }
+
+                // TODO: convert to js and then need to eval() the js.
+                // need to make sure the module is loaded properly so i might wrap in like another module wrapper in the scope of the eval.
+            }
+        };
+
+        document.addEventListener("keydown", handler);
+
+        return () => {
+            document.removeEventListener("keydown", handler);
+        };
+    }, [ready]);
 
     return (
         <div className="w-lvw h-lvh flex">
@@ -47,7 +112,9 @@ export const App = () => {
                     }}
                 />
             </div>
-            <div className="flex-1"></div>
+            <div className="flex-1">
+                {volume ? <NurbsViewer volumePtr={volume} /> : <></>}
+            </div>
         </div>
     );
 };
