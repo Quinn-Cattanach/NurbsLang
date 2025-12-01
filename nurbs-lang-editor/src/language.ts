@@ -15,9 +15,16 @@ export const initializeLanguage = (monaco: Monaco) => {
     monaco.editor.defineTheme("light", theme);
     monaco.languages.register({ id: "nurbsscript" });
 
-    const keywords = ["component", "const"];
+    const keywords = ["component", "const", "return"];
     const directions = ["\\+x", "\\-x", "\\+y", "\\-y", "\\+z", "\\-z"];
-    const constructors = ["Box", "Bend", "Directional", "Dirichlet", "Neumann", "MaxStress"];
+    const constructors = [
+        "Box",
+        "Bend",
+        "Directional",
+        "Dirichlet",
+        "Neumann",
+        "MaxStress",
+    ];
     const materials = ["Aluminum"];
     const functions = ["bend", "minimize"];
 
@@ -31,7 +38,10 @@ export const initializeLanguage = (monaco: Monaco) => {
                 [new RegExp(`\\b(${materials.join("|")})\\b`), "constant"],
                 [new RegExp(`\\b(${functions.join("|")})\\b`), "variable"],
 
-                [/\[([0-9]+|vec)(\.([0-9]+)?)?(f)?\s*,\s*([0-9]+|vec)(\.([0-9]+)?)?(f)?\]/, "string"],
+                [
+                    /\[([0-9]+|vec)(\.([0-9]+)?)?(f)?\s*,\s*([0-9]+|vec)(\.([0-9]+)?)?(f)?\]/,
+                    "string",
+                ],
                 [/([0-9]+|vec)(\.([0-9]+)?)?(f)?/, "number"],
                 [/[{}()\[\]]/, "@brackets"],
                 [/[a-zA-Z_]\w*/, "identifier"],

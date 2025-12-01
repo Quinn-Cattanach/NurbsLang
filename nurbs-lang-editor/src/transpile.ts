@@ -50,6 +50,16 @@ function findMatchingClose(s: string, openIndex: number): number {
     return -1;
 }
 
+function replaceDirections(s: string): string {
+    s = s.replace(/\+x/g, "vec(x: 1, y: 0, z: 0)");
+    s = s.replace(/\-x/g, "vec(x: -1, y: 0, z: 0)");
+    s = s.replace(/\+y/g, "vec(x: 0, y: 1, z: 0)");
+    s = s.replace(/\-y/g, "vec(x: 0, y: -1, z: 0)");
+    s = s.replace(/\+z/g, "vec(x: 0, y: 0, z: 1)");
+    s = s.replace(/\-z/g, "vec(x: 0, y: 0, z: -1)");
+    return s;
+}
+
 function replaceTopLevelNamedCalls(
     s: string,
     names: string[],
@@ -224,7 +234,8 @@ function extractComponents(source: string) {
 
 export function transpileDSL(source: string): string {
     const codeNoComments = removeComments(source);
-    const { components, tail } = extractComponents(codeNoComments);
+    const codeTransformDirections = replaceDirections(codeNoComments);
+    const { components, tail } = extractComponents(codeTransformDirections);
 
     if (components.length === 0) throw new Error("No component found");
 
