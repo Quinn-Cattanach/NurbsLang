@@ -4,5 +4,6 @@ export default defineConfig({
     base: "/NurbsLang/",
     build: {
         target: "esnext",
+        outDir: "../docs",
     },
 });
