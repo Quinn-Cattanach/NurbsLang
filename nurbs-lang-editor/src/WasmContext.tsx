@@ -32,11 +32,24 @@ export type NurbsModuleRaw = {
         volumePtr: Nurbs3Ptr,
         lods_ptr: number[],
     ) => {
-        data: number;
+        vertices: number;
+        parametric_coords: number;
+        normals: number;
         length: number;
     };
     HEAPF32: Float32Array;
     HEAP8: Int8Array;
+};
+
+export type NurbsModule = NurbsModuleRaw & {
+    toMesh3: (
+        volumePtr: Nurbs3Ptr,
+        lods: [number, number, number],
+    ) => {
+        vertices: Float32Array;
+        parametricCoords: Float32Array;
+        normals: Float32Array;
+    };
 };
 
 export function makeNurbsModuleWrappers(
@@ -113,13 +126,6 @@ export function makeNurbsModuleWrappers(
     };
 }
 
-export type NurbsModule = NurbsModuleRaw & {
-    toMesh3: (
-        volumePtr: Nurbs3Ptr,
-        lods: [number, number, number],
-    ) => Float32Array;
-};
-
 export type WasmContextType = {
     module: NurbsModule | null;
     ready: boolean;
@@ -155,16 +161,37 @@ export const WasmContextProvider = ({ children }: ProviderProps) => {
                         volumePtr: Nurbs3Ptr,
                         lods: [number, number, number],
                     ) => {
-                        const meshRaw = rawModule.toMesh3Raw(volumePtr, lods);
-                        const buffer = rawModule.HEAPF32.buffer;
+                        const mesh_raw = rawModule.toMesh3Raw(volumePtr, lods);
 
-                        const view = new Float32Array(
-                            buffer,
-                            meshRaw.data,
-                            meshRaw.length * 4,
+                        const vertices_raw = mesh_raw.vertices;
+                        const parametric_coords_raw =
+                            mesh_raw.parametric_coords;
+                        const normals_raw = mesh_raw.normals;
+                        const length = mesh_raw.length;
+
+                        const vertex_buffer = rawModule.HEAPF32.buffer;
+                        const parameter_buffer = rawModule.HEAPF32.buffer;
+                        const normals_buffer = rawModule.HEAPF32.buffer;
+
+                        const vertices = new Float32Array(
+                            vertex_buffer,
+                            vertices_raw,
+                            length * 4,
                         );
 
-                        return view;
+                        const parametricCoords = new Float32Array(
+                            parameter_buffer,
+                            parametric_coords_raw,
+                            length,
+                        );
+
+                        const normals = new Float32Array(
+                            normals_buffer,
+                            normals_raw,
+                            length * 4,
+                        );
+
+                        return { vertices, parametricCoords, normals };
                     },
                 };
 

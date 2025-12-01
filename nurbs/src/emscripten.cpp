@@ -48,7 +48,9 @@ Nurbs3Ptr sweep2(Nurbs2Ptr tool, Nurbs1Ptr path) {
   return reinterpret_cast<Nurbs3Ptr>(result);
 }
 struct MeshRaw {
-  uintptr_t data;
+  uintptr_t vertices;
+  uintptr_t parametric_coords;
+  uintptr_t normals;
   size_t length;
 };
 
@@ -63,7 +65,10 @@ MeshRaw toMesh3Raw(Nurbs3Ptr volumePtr, emscripten::val lodsJs) {
   mesh *m = vol->to_mesh(lods);
 
   MeshRaw out;
-  out.data = reinterpret_cast<uintptr_t>(m->vertices.data());
+  out.vertices = reinterpret_cast<uintptr_t>(m->vertices.data());
+  out.parametric_coords =
+      reinterpret_cast<uintptr_t>(m->parametricCoordinates.data());
+  out.normals = reinterpret_cast<uintptr_t>(m->normals.data());
   out.length = m->vertices.size();
 
   return out;
@@ -82,7 +87,9 @@ EMSCRIPTEN_BINDINGS(nurbs_module) {
   function("sweep2", &sweep2);
 
   value_object<MeshRaw>("MeshRaw")
-      .field("data", &MeshRaw::data)
+      .field("vertices", &MeshRaw::vertices)
+      .field("parametric_coords", &MeshRaw::parametric_coords)
+      .field("normals", &MeshRaw::normals)
       .field("length", &MeshRaw::length);
 
   function("toMesh3Raw", &toMesh3Raw);

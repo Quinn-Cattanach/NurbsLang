@@ -119,7 +119,7 @@ export const NurbsViewer = ({
             const format = navigator.gpu.getPreferredCanvasFormat();
             context.configure({ device, format, alphaMode: "opaque" });
 
-            const vertices = module.toMesh3(volumePtr, lods);
+            const { vertices } = module.toMesh3(volumePtr, lods);
             const vertexCount = vertices.length / 4;
 
             const vertexBuffer = device.createBuffer({

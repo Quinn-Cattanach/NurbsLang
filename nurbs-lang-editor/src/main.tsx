@@ -7,11 +7,9 @@ import { WasmContextProvider } from "./WasmContext";
 import { RenderingManager } from "./RenderingContext";
 
 createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-        <WasmContextProvider>
-            <RenderingManager>
-                <App />
-            </RenderingManager>
-        </WasmContextProvider>
-    </StrictMode>,
+    <WasmContextProvider>
+        <RenderingManager>
+            <App />
+        </RenderingManager>
+    </WasmContextProvider>,
 );

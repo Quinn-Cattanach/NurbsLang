@@ -240,6 +240,15 @@ LBracket.minimize({
 
 `;
 
+const EditorApp = () => {
+    return (
+        <iframe
+            src="https://143.215.109.147:5173/index.html"
+            style={{ width: "100%", height: "100%", border: "none" }}
+        />
+    );
+};
+
 export const Slide7 = () => {
     const [code, setCode] = useState<string | undefined>(defaultProgram);
 
@@ -257,26 +266,9 @@ export const Slide7 = () => {
             <div className="w-full flex grow max-h-1/2">
                 <div className="flex-1 h-full flex flex-col gap-2">
                     <div className="h-150 w-full">
-                        <Editor
-                            defaultLanguage="nurbsscript"
-                            value={code}
-                            onChange={(value) => setCode(value)}
-                            theme="light"
-                            beforeMount={handleEditorWillMount}
-                            options={{
-                                scrollBeyondLastLine: false,
-                                automaticLayout: true,
-                                minimap: { enabled: false },
-                                fontSize: 20,
-                                fontFamily: "LatinModernMono",
-                            }}
-                        />
+                        <EditorApp />
                     </div>
                     <Button className="ml-auto w-50">Optimize!</Button>
-                </div>
-
-                <div className="flex-1 h-150 pl-8">
-                    <canvas className="bg-black w-full h-full flex"></canvas>
                 </div>
             </div>
         </div>
