@@ -1,8 +1,13 @@
 import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { initializeLanguage } from "./language";
-import { WasmContext, type Nurbs3Ptr } from "./WasmContext";
+import {
+    makeNurbsModuleWrappers,
+    WasmContext,
+    type Nurbs3Ptr,
+} from "./WasmContext";
 import { NurbsViewer } from "./NurbsViewer";
+import { transpileDSL } from "./transpile";
 // import Module from "../../nurbs/build-wasm/nurbs.js";
 //
 const defaultProgram = `
@@ -17,14 +22,14 @@ component LBracket(radius: [0, 2]) {
 }
 
 // Simulated as aluminum fixed to a wall with a load.
-LBracket.minimize({
-    objective: MaxStress,
-    material: Aluminum,
-    boundaryConditions: [
-        Directional(direction: -w, condition: Dirichlet(0)),
-        Directional(direction: u, condition: Neumann(500 * -w)),
-    ],
-});
+// LBracket.minimize({
+//     objective: MaxStress,
+//     material: Aluminum,
+//     boundaryConditions: [
+//         Directional(direction: -w, condition: Dirichlet(0)),
+//         Directional(direction: u, condition: Neumann(500 * -w)),
+//     ],
+// });
 
 `;
 
@@ -50,6 +55,31 @@ export const App = () => {
     const handleEditorWillMount = (monaco: Monaco) => {
         initializeLanguage(monaco);
     };
+
+    useEffect(() => {
+        const handler = function (e) {
+            // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                e.preventDefault();
+
+                if (code && module) {
+                    const jscode = transpileDSL(code);
+                    console.log(jscode);
+                    const wrapper = makeNurbsModuleWrappers(module);
+                    eval(jscode);
+                }
+
+                // TODO: convert to js and then need to eval() the js.
+                // need to make sure the module is loaded properly so i might wrap in like another module wrapper in the scope of the eval.
+            }
+        };
+
+        document.addEventListener("keydown", handler);
+
+        return () => {
+            document.removeEventListener("keydown", handler);
+        };
+    }, [ready]);
 
     return (
         <div className="w-lvw h-lvh flex">

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext, useState } from "react";
+import { useRef, useEffect, useContext } from "react";
 import type { Nurbs3Ptr } from "./WasmContext";
 import { WasmContext } from "./WasmContext";
 
@@ -9,12 +9,20 @@ type NurbsViewerProps = {
 
 export const NurbsViewer = ({
     volumePtr,
-    lods = [20, 20, 20],
+    lods = [10, 10, 80],
 }: NurbsViewerProps) => {
     const { module, ready } = useContext(WasmContext);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const animationRef = useRef<number>(0);
-    const [zoom, setZoom] = useState(1);
+
+    const cameraState = useRef({
+        zoom: 0.2,
+        rotX: 0,
+        rotY: 0,
+    });
+
+    const isDragging = useRef(false);
+    const lastMousePos = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
         if (!module || !ready) return;
@@ -22,8 +30,9 @@ export const NurbsViewer = ({
         if (!canvas || !navigator.gpu) return;
 
         const resizeCanvas = () => {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = canvas.clientWidth * devicePixelRatio;
+            canvas.height = canvas.clientHeight * devicePixelRatio;
         };
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
@@ -46,29 +55,81 @@ export const NurbsViewer = ({
             });
             device.queue.writeBuffer(vertexBuffer, 0, vertices);
 
-            // Uniform buffer for zoom
             const uniformBuffer = device.createBuffer({
-                size: 4,
+                size: 16,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
             const shaderCode = `
-struct VertexOutput {
-  @builtin(position) Position : vec4<f32>,
+struct Uniforms {
+  zoom: f32,
+  rotX: f32,
+  rotY: f32,
+  pad: f32,
 };
 
-@group(0) @binding(0) var<uniform> zoom : f32;
+struct VertexOutput {
+  @builtin(position) Position : vec4<f32>,
+  @location(0) vViewPos : vec3<f32>, // Pass the rotated position to Fragment Shader
+};
+
+@group(0) @binding(0) var<uniform> u : Uniforms;
 
 @vertex
-fn vs_main(@location(0) position: vec3<f32>) -> VertexOutput {
+fn vs_main(@location(0) data: vec4<f32>) -> VertexOutput {
   var out: VertexOutput;
-  out.Position = vec4<f32>(position * zoom, 1.0);
+
+  // 1. Center
+  var pos = data.xyz - vec3<f32>(0.5, 0.5, 0.5);
+
+  // 2. Rotate X
+  let cX = cos(u.rotX);
+  let sX = sin(u.rotX);
+  let ry = pos.y * cX - pos.z * sX;
+  let rz = pos.y * sX + pos.z * cX;
+  pos.y = ry;
+  pos.z = rz;
+
+  // 3. Rotate Y
+  let cY = cos(u.rotY);
+  let sY = sin(u.rotY);
+  let rx = pos.x * cY + pos.z * sY;
+  let rz2 = -pos.x * sY + pos.z * cY;
+  pos.x = rx;
+  pos.z = rz2;
+
+  // Pass the "View Space" position (rotated but not squashed) to fragment shader
+  // We need this to calculate accurate normals
+  out.vViewPos = pos;
+
+  // 4. Output Clip Position
+  out.Position = vec4<f32>(
+      pos.x * u.zoom,
+      pos.y * u.zoom,
+      (pos.z * u.zoom * 0.1) + 0.5, // Squash Z for clip space
+      1.0
+  );
+
   return out;
 }
 
 @fragment
-fn fs_main() -> @location(0) vec4<f32> {
-  return vec4<f32>(0.2, 0.7, 1.0, 1.0);
+fn fs_main(@location(0) vViewPos: vec3<f32>) -> @location(0) vec4<f32> {
+  // --- CALCULATE NORMAL FROM POSITION ---
+
+  // 1. Get the derivatives of the position (how much P changes per pixel)
+  let dp_dx = dpdx(vViewPos);
+  let dp_dy = dpdy(vViewPos);
+
+  // 2. The Cross Product of these two vectors gives the surface Normal
+  // normalize ensures length is 1.0
+  let N = normalize(cross(dp_dx, dp_dy));
+
+  // 3. Map Normal (-1.0 to 1.0) to Color (0.0 to 1.0)
+  // Standard Normal Map colors: X=Red, Y=Green, Z=Blue
+  let color = N * 0.5 + 0.5;
+
+  return vec4<f32>(color, 1.0);
 }
 `;
 
@@ -83,12 +144,12 @@ fn fs_main() -> @location(0) vec4<f32> {
                     entryPoint: "vs_main",
                     buffers: [
                         {
-                            arrayStride: 4 * 4,
+                            arrayStride: 16,
                             attributes: [
                                 {
                                     shaderLocation: 0,
                                     offset: 0,
-                                    format: "float32x3",
+                                    format: "float32x4",
                                 },
                             ],
                         },
@@ -99,10 +160,18 @@ fn fs_main() -> @location(0) vec4<f32> {
                     entryPoint: "fs_main",
                     targets: [{ format }],
                 },
-                primitive: {
-                    topology: "point-list",
-                    cullMode: "none",
+                primitive: { topology: "triangle-list", cullMode: "none" },
+                depthStencil: {
+                    depthWriteEnabled: true,
+                    depthCompare: "less",
+                    format: "depth24plus",
                 },
+            });
+
+            let depthTexture = device.createTexture({
+                size: [canvas.width, canvas.height],
+                format: "depth24plus",
+                usage: GPUTextureUsage.RENDER_ATTACHMENT,
             });
 
             const bindGroup = device.createBindGroup({
@@ -113,25 +182,41 @@ fn fs_main() -> @location(0) vec4<f32> {
             const frame = () => {
                 if (!canvas) return;
 
-                // Update zoom uniform
+                if (
+                    depthTexture.width !== canvas.width ||
+                    depthTexture.height !== canvas.height
+                ) {
+                    depthTexture.destroy();
+                    depthTexture = device.createTexture({
+                        size: [canvas.width, canvas.height],
+                        format: "depth24plus",
+                        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+                    });
+                }
+
+                const { zoom, rotX, rotY } = cameraState.current;
                 device.queue.writeBuffer(
                     uniformBuffer,
                     0,
-                    new Float32Array([zoom]),
+                    new Float32Array([zoom, rotX, rotY, 0.0]),
                 );
 
                 const encoder = device.createCommandEncoder();
-                const textureView = context.getCurrentTexture().createView();
-
                 const pass = encoder.beginRenderPass({
                     colorAttachments: [
                         {
-                            view: textureView,
+                            view: context.getCurrentTexture().createView(),
                             loadOp: "clear",
                             storeOp: "store",
-                            clearValue: { r: 0, g: 0, b: 0, a: 1 },
+                            clearValue: { r: 0.1, g: 0.1, b: 0.1, a: 1 },
                         },
                     ],
+                    depthStencilAttachment: {
+                        view: depthTexture.createView(),
+                        depthClearValue: 1.0,
+                        depthLoadOp: "clear",
+                        depthStoreOp: "store",
+                    },
                 });
 
                 pass.setPipeline(pipeline);
@@ -153,21 +238,42 @@ fn fs_main() -> @location(0) vec4<f32> {
             cancelAnimationFrame(animationRef.current);
             window.removeEventListener("resize", resizeCanvas);
         };
-    }, [module, ready, volumePtr, lods, zoom]);
+    }, [module, ready, volumePtr, lods]);
 
-    // Mouse wheel zoom
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+    const handleMouseDown = (e: React.MouseEvent) => {
+        isDragging.current = true;
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+    };
 
-        const onWheel = (e: WheelEvent) => {
-            e.preventDefault();
-            setZoom((z) => Math.max(0.1, z + e.deltaY * -0.001));
-        };
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging.current) return;
+        const deltaX = e.clientX - lastMousePos.current.x;
+        const deltaY = e.clientY - lastMousePos.current.y;
+        const speed = 0.01;
+        cameraState.current.rotY += deltaX * speed;
+        cameraState.current.rotX += deltaY * speed;
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+    };
 
-        canvas.addEventListener("wheel", onWheel);
-        return () => canvas.removeEventListener("wheel", onWheel);
-    }, []);
+    const handleMouseUp = () => (isDragging.current = false);
 
-    return <canvas ref={canvasRef} className="w-full h-full rounded-md" />;
+    const handleWheel = (e: React.WheelEvent) => {
+        const zoomSpeed = 0.001;
+        const newZoom = cameraState.current.zoom + e.deltaY * -zoomSpeed;
+        cameraState.current.zoom = Math.max(0.01, newZoom);
+    };
+
+    return (
+        <div className="p-4 w-full h-full">
+            <canvas
+                ref={canvasRef}
+                className="w-full h-full rounded-md cursor-move"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onWheel={handleWheel}
+            />
+        </div>
+    );
 };

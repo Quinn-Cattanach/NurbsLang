@@ -39,6 +39,56 @@ export type NurbsModuleRaw = {
     HEAP8: Int8Array;
 };
 
+export function makeNurbsModuleWrappers(module: NurbsModuleRaw) {
+    return {
+        Line: ({
+            length,
+            x,
+            y,
+            z,
+        }: {
+            length: number;
+            x: number;
+            y: number;
+            z: number;
+        }) => module.Line(length, x, y, z),
+
+        Rectangle: ({ u, v }: { u: number; v: number }) =>
+            module.Rectangle(u, v),
+
+        Box: ({ u, v, w }: { u: number; v: number; w: number }) =>
+            module.Box(u, v, w),
+
+        BentLine: ({
+            length,
+            bendOrigin,
+            radius,
+            startDirection,
+            endDirection,
+        }: {
+            length: number;
+            bendOrigin: number;
+            radius: number;
+            startDirection: { x: number; y: number; z: number };
+            endDirection: { x: number; y: number; z: number };
+        }) =>
+            module.BentLine(
+                length,
+                bendOrigin,
+                radius,
+                startDirection.x,
+                startDirection.y,
+                startDirection.z,
+                endDirection.x,
+                endDirection.y,
+                endDirection.z,
+            ),
+
+        sweep2: ({ tool, path }: { tool: Nurbs2Ptr; path: Nurbs1Ptr }) =>
+            module.sweep2(tool, path),
+    };
+}
+
 export type NurbsModule = NurbsModuleRaw & {
     toMesh3: (
         volumePtr: Nurbs3Ptr,
