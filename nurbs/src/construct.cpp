@@ -9,7 +9,7 @@
 using namespace std;
 
 
-float resolve_var(const string& var_name, const unordered_map<string, float>& var_values) {
+float resolve_variable(const string& var_name, const unordered_map<string, float>& var_values) {
     try {
         size_t pos; 
         float value = stof(var_name, &pos);
@@ -28,10 +28,10 @@ nurbs<1> build_line(const object& obj, const unordered_map<string, float>& var_v
         throw runtime_error("build_line called on non-Line object");
     }
 
-    float len = resolve_var(obj.parameters.line.length, var_values);
-    float dir_x = resolve_var(obj.parameters.line.direction_x, var_values);
-    float dir_y = resolve_var(obj.parameters.line.direction_y, var_values);
-    float dir_z = resolve_var(obj.parameters.line.direction_z, var_values);
+    float len = resolve_variable(obj.parameters.line.length, var_values);
+    float dir_x = resolve_variable(obj.parameters.line.direction_x, var_values);
+    float dir_y = resolve_variable(obj.parameters.line.direction_y, var_values);
+    float dir_z = resolve_variable(obj.parameters.line.direction_z, var_values);
 
     // normalize directions 
     vec3f_wgsl direction(dir_x, dir_y, dir_z);
@@ -50,17 +50,17 @@ nurbs<1> build_bent_line(const object& obj, const unordered_map<string, float>& 
         throw std::runtime_error("build_bent_line called on non-BENT_LINE object");
     }
 
-    float length = resolve_var(obj.parameters.bent_line.length, var_values);
-    float bend_origin_u = resolve_var(obj.parameters.bent_line.bend_origin_u, var_values);
-    float radius = resolve_var(obj.parameters.bent_line.radius, var_values);
+    float length = resolve_variable(obj.parameters.bent_line.length, var_values);
+    float bend_origin_u = resolve_variable(obj.parameters.bent_line.bend_origin_u, var_values);
+    float radius = resolve_variable(obj.parameters.bent_line.radius, var_values);
 
-    float base_dir_x = resolve_var(obj.parameters.bent_line.base_dir_x, var_values);
-    float base_dir_y = resolve_var(obj.parameters.bent_line.base_dir_y, var_values);
-    float base_dir_z = resolve_var(obj.parameters.bent_line.base_dir_z, var_values);
+    float base_dir_x = resolve_variable(obj.parameters.bent_line.base_dir_x, var_values);
+    float base_dir_y = resolve_variable(obj.parameters.bent_line.base_dir_y, var_values);
+    float base_dir_z = resolve_variable(obj.parameters.bent_line.base_dir_z, var_values);
 
-    float bend_dir_x = resolve_var(obj.parameters.bent_line.bend_dir_x, var_values);
-    float bend_dir_y = resolve_var(obj.parameters.bent_line.bend_dir_y, var_values);
-    float bend_dir_z = resolve_var(obj.parameters.bent_line.bend_dir_z, var_values);
+    float bend_dir_x = resolve_variable(obj.parameters.bent_line.bend_dir_x, var_values);
+    float bend_dir_y = resolve_variable(obj.parameters.bent_line.bend_dir_y, var_values);
+    float bend_dir_z = resolve_variable(obj.parameters.bent_line.bend_dir_z, var_values);
 
     // Create direction vectors 
     vec3f_wgsl base_dir(base_dir_x, base_dir_y, base_dir_z);
@@ -73,26 +73,7 @@ nurbs<1> build_bent_line(const object& obj, const unordered_map<string, float>& 
     base_dir = base_dir.normalized();
     bend_dir = bend_dir.normalized();
 
-    // Create bent line using transformations:
-    // Create straight line
-    // nurbs<1> straight_line = line(length, vec3f_wgsl(1, 0, 0));
-    // // Apply bend at bend_origin_u
-    // float bend_length = length * (1.0 - bend_origin_u);
-    // float bend_angle = bend_length / radius;
-    // // Cross product for roatation axis 
-    // vec3f_wgsl rot_axis = base_dir.cross(bend_dir);
-
-    // straight_line.bend(0, bend_origin_u, bend_angle, radius);
-
-    // return straight_line;
-
-    return arc(
-        radius, 
-        M_PI / 2.0,  // 90 degrees
-        vec3f_wgsl(0, 0, 0),
-        base_dir,
-        base_dir.cross(bend_dir).normalized()
-    );
+    return bent_line(length, bend_origin_u, radius, base_dir, bend_dir);
 }
 
 // Build rectangle primitive 
@@ -101,8 +82,8 @@ nurbs<2> build_rectangle(const object& obj, const unordered_map<string, float>& 
         throw std::runtime_error("build_rectangle called on non-RECTANGLE object");
     }
 
-    float width = resolve_var(obj.parameters.rectangle.width, var_values);
-    float height = resolve_var(obj.parameters.rectangle.height, var_values);
+    float width = resolve_variable(obj.parameters.rectangle.width, var_values);
+    float height = resolve_variable(obj.parameters.rectangle.height, var_values);
 
     return rectangle(width, height);
 }
@@ -113,9 +94,9 @@ nurbs<3> build_box(const object& obj, const unordered_map<string, float>& var_va
         throw std::runtime_error("build_box called on non-BOX object");
     }
 
-    float width = resolve_var(obj.parameters.box.width, var_values);
-    float height = resolve_var(obj.parameters.box.height, var_values);
-    float depth = resolve_var(obj.parameters.box.depth, var_values);
+    float width = resolve_variable(obj.parameters.box.width, var_values);
+    float height = resolve_variable(obj.parameters.box.height, var_values);
+    float depth = resolve_variable(obj.parameters.box.depth, var_values);
     
     return box(width, height, depth);
 }
@@ -160,16 +141,20 @@ nurbs<3> construct(const vector<operation>& construction, const unordered_map<st
     }
 
     vector<nurbs<3>> objects;
+    objects.reserve(construction.size());
 
-    for (const auto& op : construction) {
+    for (size_t i = 0; i < construction.size(); ++i) {
+        const auto& op = construction[i];
         nurbs<3> result;
 
         switch (op.type) {
+
             case operation::SWEEP: {
-                // Build the face (2D) and path (1D)
+                // Build face (2D) + path (1D)
                 nurbs<2> face = build_primitive<2>(op.parameters.sweep.face, var_values);
                 nurbs<1> path = build_primitive<1>(op.parameters.sweep.path, var_values);
-                
+
+                // Sweep produces 3D
                 result = face.sweep(path);
                 break;
             }
@@ -178,11 +163,11 @@ nurbs<3> construct(const vector<operation>& construction, const unordered_map<st
         objects.push_back(result);
     }
 
+    // If only one object, return it
     if (objects.size() == 1) {
         return objects[0];
-    } else {
-        // TODO: we either need a union operation to combine all the objects from the different operations? 
-        // Or just return the last object:
-        return objects[objects.size() - 1];
     }
+
+    // Otherwise return the last object (consistent with CAD procedural semantics)
+    return objects.back();
 }

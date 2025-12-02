@@ -130,110 +130,89 @@ nurbs<1> bent_line(float length, float bend_origin_u, float radius,
    */
 
   nurbs<1> result;
-  result.degree[0] = 3;
 
-  float n0 = base_dir.norm();
-  float n1 = bend_dir.norm();
-  if (n0 != 0.0f)
-    base_dir /= n0;
-  if (n1 != 0.0f)
-    bend_dir /= n1;
+    // Normalize directions
+    base_dir = base_dir.normalized();
+    bend_dir = bend_dir.normalized();
 
-  float cos_angle = clamp(base_dir.dot(bend_dir), -1.0f, 1.0f);
-  float angle = acosf(cos_angle);
+    // Compute bend angle
+    float cosA  = clamp(base_dir.dot(bend_dir), -1.0f, 1.0f);
+    float angle = acosf(cosA);
 
-  if (angle < 1e-6f || angle > 3.14159f - 1e-6f) {
-    angle = 0.0f;
-    radius = 0.0f;
-  }
+    if (angle < 1e-6f)
+        throw std::runtime_error("Bent_line: zero bend angle");
 
-  vec3f_wgsl bend_dir_ortho = bend_dir - base_dir * base_dir.dot(bend_dir);
-  float n2 = bend_dir_ortho.norm();
-  if (n2 > 1e-6f) {
-    bend_dir_ortho /= n2;
-  } else {
-    if (fabs(base_dir.x) < fabs(base_dir.y))
-      bend_dir_ortho =
-          vec3f_wgsl(1, 0, 0) - base_dir * base_dir.dot(vec3f_wgsl(1, 0, 0));
-    else
-      bend_dir_ortho =
-          vec3f_wgsl(0, 1, 0) - base_dir * base_dir.dot(vec3f_wgsl(0, 1, 0));
-    float n3 = bend_dir_ortho.norm();
-    if (n3 != 0.0f)
-      bend_dir_ortho /= n3;
-    else
-      bend_dir_ortho = vec3f_wgsl(0, 0, 1);
-  }
+    // Compute arc length
+    float arc_len = radius * angle;
 
-  bend_origin_u = clamp(bend_origin_u, 0.0f, 1.0f);
+    // Compute how much straight length remains
+    float straight_len = length - arc_len;
+    if (straight_len < 0.0f)
+        straight_len = 0.0f;
 
-  float arc_len = radius * angle;
+    // Divide straight into two parts
+    float pre_len  = bend_origin_u * straight_len;
+    float post_len = straight_len - pre_len;
 
-  // The center of the arc is at bend_origin_u along the total length
-  // The arc starts radius distance BEFORE the center
-  // The arc ends radius distance AFTER the center (measured along the chord)
+    // ----------- Build control points ----------
+    // p0: start
+    vec3f_wgsl p0 = vec3f_wgsl(0,0,0);
 
-  float center_position = bend_origin_u * length;
-  float pre_len = center_position - radius * sinf(angle / 2.0f);
-  float post_len = length - center_position - radius * sinf(angle / 2.0f);
+    // p1: end of first straight
+    vec3f_wgsl p1 = p0 + base_dir * pre_len;
 
-  if (pre_len < 0.0f)
-    pre_len = 0.0f;
-  if (post_len < 0.0f)
-    post_len = 0.0f;
+    // Compute arc center
+    // Arc plane normal is perpendicular to base_dir and bend_dir
+    vec3f_wgsl normal = base_dir.cross(bend_dir).normalized();
+    vec3f_wgsl start_tangent = base_dir;
+    vec3f_wgsl start_normal  = normal.cross(start_tangent).normalized();
 
-  vec3f_wgsl p0 = vec3f_wgsl(0.0f, 0.0f, 0.0f);
-  vec3f_wgsl p1 = p0 + base_dir * pre_len;
+    // The arc center is offset by radius in the negative normal direction
+    vec3f_wgsl center = p1 + start_normal * radius;
 
-  vec3f_wgsl end_tangent =
-      base_dir * cosf(angle) + bend_dir_ortho * sinf(angle);
+    // p2: end of arc (start + rotated base_dir by angle)
+    vec3f_wgsl p2 =
+        center
+      + start_tangent * ( radius * cosf(angle) )
+      + start_normal  * ( radius * sinf(angle) );
 
-  vec3f_wgsl arc_center =
-      p1 + base_dir * radius +
-      bend_dir_ortho * radius * (1.0f - cosf(angle)) / sinf(angle);
-  vec3f_wgsl p2 =
-      p1 +
-      base_dir * (2.0f * radius * sinf(angle / 2.0f) * cosf(angle / 2.0f)) +
-      bend_dir_ortho *
-          (2.0f * radius * sinf(angle / 2.0f) * sinf(angle / 2.0f));
+    // p3: final straight
+    vec3f_wgsl p3 = p2 + bend_dir * post_len;
 
-  vec3f_wgsl p3 = p2 + end_tangent * post_len;
-  float k = 4.0f / 3.0f * tanf(angle / 4.0f);
+    // Build the arc using your existing arc() function
+    nurbs<1> arc_curve = arc(radius, angle, center, start_tangent, normal);
 
-  vector<vec3f_wgsl> C;
-  C.reserve(10);
-  C.push_back(p0);
-  C.push_back(p0 + base_dir * (pre_len / 3.0f));
-  C.push_back(p0 + base_dir * (2.0f * pre_len / 3.0f));
-  C.push_back(p1);
-  C.push_back(p1 + base_dir * (k * radius));
-  C.push_back(p2 - end_tangent * (k * radius));
-  C.push_back(p2);
-  C.push_back(p2 + end_tangent * (post_len / 3.0f));
-  C.push_back(p2 + end_tangent * (2.0f * post_len / 3.0f));
-  C.push_back(p3);
+    // Now we build a composite curve: line → arc → line
+    result.degree[0] = 3;
+    result.control.clear();
+    result.weight.clear();
 
-  result.control.clear();
-  result.weight.clear();
-  for (auto &pt : C) {
-    result.control.emplace_back(pt.x, pt.y, pt.z);
-    result.weight.emplace_back(1.0f);
-  }
+    // Add p0 → p1 (straight)
+    result.control.push_back(p0);
+    result.weight.push_back(1.0f);
 
-  float L = pre_len + arc_len + post_len;
-  float t1 = 1.0f / 3.0f, t2 = 2.0f / 3.0f;
-  if (L > 1e-9f) {
-    t1 = pre_len / L;
-    t2 = (pre_len + arc_len) / L;
-    t1 = clamp(t1, 0.0f, 1.0f);
-    t2 = clamp(t2, 0.0f, 1.0f);
-  }
+    result.control.push_back(p1);
+    result.weight.push_back(1.0f);
 
-  result.knot[0].clear();
-  result.knot[0].insert(result.knot[0].end(), 4, 0.0f);
-  result.knot[0].insert(result.knot[0].end(), 3, t1);
-  result.knot[0].insert(result.knot[0].end(), 3, t2);
-  result.knot[0].insert(result.knot[0].end(), 4, 1.0f);
+    // Insert arc control points
+    for (size_t i=0; i < arc_curve.control.size(); ++i) {
+        result.control.push_back(arc_curve.control[i]);
+        result.weight.push_back(arc_curve.weight[i]);
+    }
 
-  return result;
+    // Add p2 → p3 (straight)
+    result.control.push_back(p2);
+    result.weight.push_back(1.0f);
+
+    result.control.push_back(p3);
+    result.weight.push_back(1.0f);
+
+    // Knot vector with 3 segments: [straight | arc | straight]
+    result.knot[0].clear();
+    result.knot[0] = {0,0,0,0,   // degree 3 start
+                      0.33,0.33,
+                      0.66,0.66,
+                      1,1,1,1};
+
+    return result;
 }

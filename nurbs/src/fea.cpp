@@ -2,6 +2,10 @@
 #include <cmath>
 #include <gismo.h>
 #include <limits>
+#include <gsElasticity/src/gsElasticityAssembler.h>
+#include <gsElasticity/src/gsElasticityFunctions.h>
+#include <gsElasticity/src/gsLinearMaterial.h>
+#include <gsElasticity/src/gsMaterialContainer.h>
 
 using namespace gismo;
 
@@ -15,9 +19,9 @@ gsMultiPatch<real_t> nurbs_to_gismo(const nurbs<3> &geom) {
   int deg_w = geom.degree[2];
 
   // Create knot vectors
-  gsKnotVector<real_t> kv_u(geom.knot[0].begin(), geom.knot[0].end(), deg_u);
-  gsKnotVector<real_t> kv_v(geom.knot[1].begin(), geom.knot[1].end(), deg_v);
-  gsKnotVector<real_t> kv_w(geom.knot[2].begin(), geom.knot[2].end(), deg_w);
+  gsKnotVector<real_t> kv_u(deg_u, geom.knot[0].begin(), geom.knot[0].end());
+  gsKnotVector<real_t> kv_v(deg_v, geom.knot[1].begin(), geom.knot[1].end());
+  gsKnotVector<real_t> kv_w(deg_w, geom.knot[2].begin(), geom.knot[2].end());
 
   // Create tensor basis
   gsTensorBSplineBasis<3, real_t> basis(kv_u, kv_v, kv_w);
@@ -46,7 +50,11 @@ gsMultiPatch<real_t> nurbs_to_gismo(const nurbs<3> &geom) {
   }
 
   // Create NURBS geometry (rational B-spline)
-  gsTensorNurbs<3, real_t> nurbs_geom(basis, coefs, weights);
+  // gsTensorNurbs<3, real_t> nurbs_geom(basis, coefs, weights);
+  gsTensorNurbs<3, real_t> nurbs_geom(
+    kv_u, kv_v, kv_w,
+    coefs, weights
+);
 
   // Create multipatch with single patch
   gsMultiPatch<real_t> mp;
@@ -102,76 +110,57 @@ void apply_boundary_conditions(const std::vector<bc::n_boundary_condition> &bcs,
 }
 
 // Calculate von Mises stress from displacement field
-std::vector<float>
-calculate_von_mises_stress(gsElasticityAssembler<real_t> &assembler,
-                           const gsMatrix<real_t> &displacement_vector,
-                           const material &mat) {
-  // von Mises stress calculation requires:
-  // 1. Strain tensor from displacement gradients
-  // 2. Stress tensor from strain using constitutive law
-  // 3. von Mises formula: sqrt(0.5 * ((σ1-σ2)² + (σ2-σ3)² + (σ3-σ1)²))
-
+std::vector<float> calculate_von_mises_stress(gsElasticityAssembler<real_t> &assembler,
+                                              const gsMatrix<real_t> &displacement_vector,
+                                              const material &mat) {
   std::vector<float> von_mises_stress;
 
-  // Get the geometry patch
-  gsMultiPatch<real_t> disp_multi;
-  assembler.constructSolution(displacement_vector, disp_multi, 0);
+  try {
+    // Construct the displacement field as a multipatch
+    gsMultiPatch<real_t> disp_multi;
+\
+    assembler.constructSolution(displacement_vector, assembler.allFixedDofs(), disp_multi);
 
-  // create a gsCauchyStressFunction (computes Cauchy stress tensor from
-  // displacement field)
-  gsCauchyStressFunction<real_t> stressFunc(disp_multi, mat.youngs_modulus,
-                                            mat.poissons_ratio);
+    // Get von Mises stress directly (for 3D problems)
+    gsPiecewiseFunction<real_t> stresses;
+    assembler.constructCauchyStresses(disp_multi, stresses, 
+                                      stress_components::von_mises);
 
-  // choose evaluation points in parameter domain (we evaluate per patch—here
-  // only patch 0)
-  int n_samples = 10;
-  int total_samples = n_samples * n_samples * n_samples;
-  gsMatrix<real_t> pts(3, total_samples);
-  int idx = 0;
-  for (int i = 0; i < n_samples; ++i) {
-    for (int j = 0; j < n_samples; ++j) {
-      for (int k = 0; k < n_samples; ++k) {
-        pts(0, idx) = static_cast<real_t>(i) / (n_samples - 1);
-        pts(1, idx) = static_cast<real_t>(j) / (n_samples - 1);
-        pts(2, idx) = static_cast<real_t>(k) / (n_samples - 1);
-        idx++;
+    // Create evaluation points in parameter domain (uniformly distributed)
+    int n_samples = 10;
+    int total_samples = n_samples * n_samples * n_samples;
+    gsMatrix<real_t> pts(3, total_samples);
+    
+    int idx = 0;
+    for (int i = 0; i < n_samples; ++i) {
+      for (int j = 0; j < n_samples; ++j) {
+        for (int k = 0; k < n_samples; ++k) {
+          pts(0, idx) = static_cast<real_t>(i) / (n_samples - 1);
+          pts(1, idx) = static_cast<real_t>(j) / (n_samples - 1);
+          pts(2, idx) = static_cast<real_t>(k) / (n_samples - 1);
+          idx++;
+        }
       }
     }
-  }
 
-  // Evaluate stress function: Expectation is to get a matrix of size (6 x N)
-  // for symmetric stress components: order: (sigma_xx, sigma_yy, sigma_zz,
-  // sigma_xy, sigma_yz, sigma_zx)
-  gsMatrix<real_t> stress_at_pts;
-  stressFunc.eval_into(pts, stress_at_pts);
+    // Evaluate von Mises stress at all points
+    // Result should be 1 x total_samples (von Mises is a scalar)
+    gsMatrix<real_t> stress_values = stresses.piece(0).eval(pts);
 
-  if (stress_at_pts.cols() != total_samples) {
-    // fallback: return zero-field
-    von_mises_stress.assign(total_samples, 0.0f);
-    return von_mises_stress;
-  }
+    if (stress_values.cols() != total_samples) {
+      von_mises_stress.assign(total_samples, 0.0f);
+      return von_mises_stress;
+    }
 
-  // compute von Mises from stress components
-  von_mises_stress.resize(total_samples);
-  for (int c = 0; c < total_samples; ++c) {
-    // get components (ensure indexing matches the return format)
-    real_t sxx = stress_at_pts(0, c);
-    real_t syy = stress_at_pts(1, c);
-    real_t szz = stress_at_pts(2, c);
-    real_t sxy = stress_at_pts(3, c);
-    real_t syz = stress_at_pts(4, c);
-    real_t szx = stress_at_pts(5, c);
-
-    // von Mises formula:
-    // sigma_v = sqrt( 0.5 * ((sxx - syy)^2 + (syy - szz)^2 + (szz - sxx)^2) +
-    // 3*(sxy^2 + syz^2 + szx^2) )
-    double part1 =
-        0.5 * ((sxx - syy) * (sxx - syy) + (syy - szz) * (syy - szz) +
-               (szz - sxx) * (szz - sxx));
-    double part2 = 3.0 * (sxy * sxy + syz * syz + szx * szx);
-    double vm = std::sqrt(std::max(0.0, part1 + part2));
-
-    von_mises_stress[c] = static_cast<float>(vm);
+    // Convert to float vector - von Mises is already computed, just extract it
+    von_mises_stress.resize(total_samples);
+    for (int c = 0; c < total_samples; ++c) {
+      von_mises_stress[c] = static_cast<float>(stress_values(0, c));
+    }
+  } catch (const std::exception &e) {
+    // If anything fails, return zeros
+    int total = 10 * 10 * 10;
+    von_mises_stress.assign(total, 0.0f);
   }
 
   return von_mises_stress;
@@ -212,7 +201,32 @@ fea_result run_fea(const nurbs<3> &geometry,
                    const material &mat) {
   fea_result result;
   result.success = false;
-  try {
+  try {    
+    // Validate geometry first
+    std::cout << "DEBUG: Validating geometry..." << std::endl;
+    std::cout << "  Control points: " << geometry.control.size() << std::endl;
+    std::cout << "  Weights: " << geometry.weight.size() << std::endl;
+    std::cout << "  Degrees: [" << geometry.degree[0] << ", " 
+              << geometry.degree[1] << ", " << geometry.degree[2] << "]" << std::endl;
+    std::cout << "  Knot vectors: [" << geometry.knot[0].size() << ", " 
+              << geometry.knot[1].size() << ", " << geometry.knot[2].size() << "]" << std::endl;
+    
+    // Check for valid NURBS structure
+    if (geometry.control.empty()) {
+      result.error_message = "Geometry has no control points";
+      return result;
+    }
+    
+    if (geometry.degree[0] == 0 || geometry.degree[1] == 0 || geometry.degree[2] == 0) {
+      result.error_message = "Geometry has invalid degrees";
+      return result;
+    }
+    
+    if (geometry.knot[0].empty() || geometry.knot[1].empty() || geometry.knot[2].empty()) {
+      result.error_message = "Geometry has empty knot vectors";
+      return result;
+    }
+    
     // Convert geometry to G+Smo format
     gsMultiPatch<real_t> mp = nurbs_to_gismo(geometry);
 
@@ -220,9 +234,24 @@ fea_result run_fea(const nurbs<3> &geometry,
     gsBoundaryConditions<real_t> bc_gismo;
     apply_boundary_conditions(bcs, mp, bc_gismo);
 
+    // Create material
+    gsLinearMaterial<real_t> linear_material(
+        static_cast<real_t>(mat.youngs_modulus_Pa),
+        static_cast<real_t>(mat.poissons_ratio),
+        3
+    );
+    // Create material container
+    gsMaterialContainer<real_t> materials;
+    materials.add(&linear_material);
+
+    // Create a zero body force function (no gravity/body forces)
+    gsConstantFunction<real_t> body_force(0.0, 0.0, 0.0, 3);
+
+    // Create basis from multipatch
+    gsMultiBasis<real_t> basis(mp);
+
     // Create elasticity assembler
-    gsElasticityAssembler<real_t> assembler(mp, bc_gismo, mat.youngs_modulus,
-                                            mat.poissons_ratio);
+    gsElasticityAssembler<real_t> assembler(mp, basis, bc_gismo, body_force, materials);
 
     // Assemble the system
     assembler.assemble();

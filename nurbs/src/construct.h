@@ -1,5 +1,4 @@
 #pragma once
-#include "nurbs_include.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -47,52 +46,52 @@ struct variable {
 
 // Object types (primitives)
 struct object {
-    enum {
-        LINE,
-        RECTANGLE,
-        BOX,
-        BENT_LINE,
-    } type;
-    union {
-        struct {
-            std::string length; 
-            std::string bend_origin_u;
-            std::string radius;
-            std::string base_dir_x;
-            std::string base_dir_y;
-            std::string base_dir_z;
-            std::string bend_dir_x;
-            std::string bend_dir_y;
-            std::string bend_dir_z;
-        } bent_line;
-        struct {
-            std::string length;
-            std::string direction_x;
-            std::string direction_y;
-            std::string direction_z;
-        } line;
-        struct {
-            std::string width;
-            std::string height;
-        } rectangle;
-        struct {
-            std::string width;
-            std::string height;
-            std::string depth;
-        } box;
+    enum type_t { LINE, RECTANGLE, BOX, BENT_LINE } type;
+
+    struct bent_line_t {
+        std::string length;
+        std::string bend_origin_u;
+        std::string radius;
+        std::string base_dir_x, base_dir_y, base_dir_z;
+        std::string bend_dir_x, bend_dir_y, bend_dir_z;
+    };
+
+    struct line_t {
+        std::string length;
+        std::string direction_x, direction_y, direction_z;
+    };
+
+    struct rectangle_t {
+        std::string width;
+        std::string height;
+    };
+
+    struct box_t {
+        std::string width;
+        std::string height;
+        std::string depth;
+    };
+
+    // Replace union with a variant-like struct
+    struct params_t {
+        bent_line_t bent_line;
+        line_t      line;
+        rectangle_t rectangle;
+        box_t       box;
     } parameters;
 };
 
 // Operation types
 struct operation {
-    enum {
-        SWEEP,
-    } type;
-    union {
-        struct {
-            object face;
-            object path;
-        } sweep;
+    enum type_t { SWEEP } type;
+
+    struct sweep_t {
+        object face;
+        object path;
+    };
+
+    struct params_t {
+        sweep_t sweep;
     } parameters;
 };
 

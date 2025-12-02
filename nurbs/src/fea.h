@@ -3,8 +3,8 @@
 #include "material.h"
 #include "mesh.h"
 #include "nurbs.h"
-#include <gismo.h>
 #include <vector>
+#include <gsElasticity/src/gsElasticityAssembler.h>
 
 using namespace gismo;
 
@@ -35,10 +35,9 @@ void apply_boundary_conditions(const std::vector<bc::n_boundary_condition> &bcs,
                                gsBoundaryConditions<real_t> &bc_gismo);
 
 // Helper: Calculate von Mises stress from displacement field
-std::vector<float>
-calculate_von_mises_stress(const gsMultiPatch<real_t> &mp,
-                           const gsMatrix<real_t> &displacement,
-                           const material &mat);
+std::vector<float> calculate_von_mises_stress(gsElasticityAssembler<real_t> &assembler,
+                                              const gsMatrix<real_t> &displacement_vector,
+                                              const material &mat);
 
 // Helper: Extract max values from fields
 float find_max_stress(const std::vector<float> &stress_field);

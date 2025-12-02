@@ -43,6 +43,7 @@ if(EMSCRIPTEN)
         ${GISMO_SOURCE_DIR}/external/gsEigen
         ${GISMO_BUILD_DIR}
         ${GISMO_BUILD_DIR}/gsCore
+        ${GISMO_SOURCE_DIR}/optional
     )
 
     # Print include directories for debugging
@@ -53,6 +54,7 @@ if(EMSCRIPTEN)
     message(STATUS "  ${GISMO_SOURCE_DIR}/external/gsEigen")
     message(STATUS "  ${GISMO_BUILD_DIR}")
     message(STATUS "  ${GISMO_BUILD_DIR}/gsCore")
+    message(STATUS "  ${GISMO_SOURCE_DIR}/optional")
 
     # Add executable
     add_executable(nurbs ${SOURCES})
@@ -97,6 +99,7 @@ if(EMSCRIPTEN)
     # Apply Emscripten flags
     target_compile_options(nurbs PRIVATE ${EMSCRIPTEN_COMPILE_FLAGS})
     target_link_options(nurbs PRIVATE ${EMSCRIPTEN_LINK_FLAGS})
+    target_compile_definitions(nurbs PRIVATE OPTIMIZER_ENABLED)
 
     # Set output file extensions
     set_target_properties(nurbs PROPERTIES
@@ -115,15 +118,31 @@ if(EMSCRIPTEN)
 else()
     message(STATUS "Building for native platform")
 
+    set(GISMO_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../gismo")
+    set(GISMO_BUILD_DIR "${GISMO_SOURCE_DIR}/build")
+
     link_directories(/opt/homebrew/lib)
+    link_directories(${GISMO_BUILD_DIR}/lib)
 
     add_executable(nurbs ${SOURCES})
+    target_compile_definitions(nurbs PRIVATE OPTIMIZER_ENABLED)
 
     target_include_directories(nurbs PRIVATE
         ${SRC_DIR}
         /opt/homebrew/include
         /opt/homebrew/include/gismo
+        ${GISMO_BUILD_DIR}/optional/gsElasticity/src/
+        # Add gsElasticity from source tree (relative path)
+        ${GISMO_SOURCE_DIR}/optional
+        # Also add main gismo includes
+        ${GISMO_SOURCE_DIR}/src
+        ${GISMO_BUILD_DIR}
     )
 
+    message(STATUS "Native build paths:")
+    message(STATUS "  GISMO_SOURCE_DIR: ${GISMO_SOURCE_DIR}")
+    message(STATUS "  gsElasticity: ${GISMO_SOURCE_DIR}/optional")
+
     target_link_libraries(nurbs gismo)
+    target_link_libraries(nurbs "${GISMO_BUILD_DIR}/lib/libgismo.dylib")
 endif()
