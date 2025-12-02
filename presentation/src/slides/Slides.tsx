@@ -1,8 +1,10 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { InlineMath, BlockMath } from "react-katex";
 import { Editor, type Monaco, type OnMount } from "@monaco-editor/react";
 import { initializeLanguage } from "./language";
 import { Button } from "@/components/ui/button";
+
+import
 
 // function App() {
 //   return (
@@ -195,7 +197,7 @@ export const Slide5 = () => {
                 defining a set of <i>primitives</i>, like{" "}
                 <InlineCode>Box</InlineCode>, <InlineCode>Rectangle</InlineCode>
                 , and <InlineCode>Line</InlineCode> and a small set of
-                operations: <i>sweep</i> and <i>bends</i>.
+                operations: sweep and bends.
             </Text>
         </div>
     );
@@ -210,39 +212,38 @@ export const Slide6 = () => {
                 conditions on parametric{" "}
                 <InlineMath math="(u, v, w)\subseteq [0, 1]^3" /> regions of the
                 curve. For our L Bracket minimum viable product, we provided
-                ways to create <i>Dirichlet</i> and <i>Neumann</i> boundary
+                ways to create Dirichlet and Neumann boundary
                 conditions.
             </Text>
         </div>
     );
 };
 
-const defaultProgram = `
-// An L Bracket
-component LBracket(radius: [0, 2]) {
-    const startDirection = vec(x: 1, y: 0, z: 0);
-    const endDirection = vec(x: 1, y: 1, z: 0);
-
-    const path = BentLine(length: 20, bendOrigin: 0.5, startDirection /* same name as param no need for name:name */, endDirection);
-
-    return Rectangle(u: 5, v: 1).sweep(path);
-}
-
-// Simulated as aluminum fixed to a wall with a load.
-LBracket.minimize({
-    objective: MaxStress,
-    material: Aluminum,
-    boundaryConditions: [
-        Directional(direction: -w, condition: Dirichlet(0)),
-        Directional(direction: u, condition: Neumann(500 * -w)),
-    ],
-});
-
-`;
-
 const EditorApp = () => {
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    useEffect(() => {
+        const iframe = iframeRef.current;
+        if (!iframe) return;
+
+        const onLoad = () => {
+            const doc = iframe.contentDocument;
+            if (!doc) return;
+
+            // Zoom the inside of the iframe (2x)
+            doc.body.style.zoom = "2";
+            // If using Safari, prefer transform:
+            // doc.body.style.transform = "scale(2)";
+            // doc.body.style.transformOrigin = "top left";
+        };
+
+        iframe.addEventListener("load", onLoad);
+        return () => iframe.removeEventListener("load", onLoad);
+    }, []);
+
     return (
         <iframe
+            ref={iframeRef}
             src="https://quinn-cattanach.github.io/NurbsLang/"
             style={{ width: "100%", height: "100%", border: "none" }}
         />
@@ -250,12 +251,6 @@ const EditorApp = () => {
 };
 
 export const Slide7 = () => {
-    const [code, setCode] = useState<string | undefined>(defaultProgram);
-
-    const handleEditorWillMount = (monaco: Monaco) => {
-        initializeLanguage(monaco);
-    };
-
     return (
         <div className="flex flex-col h-screen w-full">
             {/* Top Section */}
@@ -269,3 +264,18 @@ export const Slide7 = () => {
         </div>
     );
 };
+
+export const Slide8 = () => {
+    return (
+        <div className="m-16 w-full h-full flex flex-col gap-8">
+            <Heading>Optimization Output</Heading>
+            <Text>
+                While we did not have time to bind it to our frontend language, the optimizer returns the expected result.
+            </Text>
+            <Text>
+                For an L Bracket with width 5cm, height 5cm of length 1m, the optimal corner radius in range <InlineMath math="[0, 20]\text{cm}"/> was found.
+            </Text>
+            <img src="/logo.png" alt="" />
+        </div>
+    );
+}

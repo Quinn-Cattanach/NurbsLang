@@ -20,6 +20,7 @@ using namespace gismo;
 #include "material.h"
 #include "mesh.h"
 #include "nurbs.h"
+#include "optimization.h"
 #include "primitives.h"
 #include "transformations.h"
 

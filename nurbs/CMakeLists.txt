@@ -44,6 +44,7 @@ if(EMSCRIPTEN)
         ${GISMO_BUILD_DIR}
         ${GISMO_BUILD_DIR}/gsCore
         ${GISMO_SOURCE_DIR}/optional
+        ${GISMO_SOURCE_DIR}/optional/gsElasticity/src
     )
 
     # Print include directories for debugging
@@ -99,7 +100,7 @@ if(EMSCRIPTEN)
     # Apply Emscripten flags
     target_compile_options(nurbs PRIVATE ${EMSCRIPTEN_COMPILE_FLAGS})
     target_link_options(nurbs PRIVATE ${EMSCRIPTEN_LINK_FLAGS})
-    target_compile_definitions(nurbs PRIVATE OPTIMIZER_ENABLED)
+    # target_compile_definitions(nurbs PRIVATE OPTIMIZER_ENABLED)
 
     # Set output file extensions
     set_target_properties(nurbs PROPERTIES
@@ -108,7 +109,7 @@ if(EMSCRIPTEN)
     )
 
     # Find and link G+Smo library
-    if(EXISTS "${GISMO_BUILD_DIR}/lib/libgismo.a")
+    if(EXISTS "/Users/quinncattanach/classes/domain_specific_language/NurbsLang/gismo/build-wasm/lib/libgismo.a")
         message(STATUS "✓ Found libgismo.a at ${GISMO_BUILD_DIR}/lib/libgismo.a")
         target_link_libraries(nurbs ${GISMO_BUILD_DIR}/lib/libgismo.a)
     else()

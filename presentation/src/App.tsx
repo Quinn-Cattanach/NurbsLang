@@ -11,6 +11,7 @@ import {
     Slide5,
     Slide6,
     Slide7,
+    Slide8,
 } from "./slides/Slides";
 import { LogicalSize, Window } from "@tauri-apps/api/window";
 
@@ -24,6 +25,7 @@ function App() {
         <Slide5 />,
         <Slide6 />,
         <Slide7 />,
+        <Slide8 />,
     ];
     const [currentSlide, setCurrentSlide] = useState(0);
 

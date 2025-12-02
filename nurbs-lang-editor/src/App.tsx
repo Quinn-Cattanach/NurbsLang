@@ -12,8 +12,8 @@ import { transpileDSL } from "./transpile";
 //
 const defaultProgram = `
 // An L Bracket
-component LBracket(radius: [0, 2]) {
-    const startDirection = vec(x: 1, y: 0, z: 0);
+component LBracket(radius: [0, 5]) {
+    const startDirection = +x;
     const endDirection = vec(x: 1, y: 1, z: 0);
 
     const path = BentLine(length: 10,
@@ -27,15 +27,19 @@ component LBracket(radius: [0, 2]) {
 
 LBracket(radius: 2.5).show();
 
-// Simulated as aluminum fixed to a wall with a load.
-// LBracket.minimize({
-//     objective: MaxStress,
-//     material: Aluminum,
-//     boundaryConditions: [
-//         Directional(direction: -w, condition: Dirichlet(0)),
-//         Directional(direction: u, condition: Neumann(500 * -w)),
-//     ],
-// });
+LBracket(radius: 2.5).export_stl("LBracket.stl");
+
+const {
+    radius,
+} = LBracket.optimize(
+    objective: MaxStress,
+    material: Aluminum,
+    boundaryConditions: [
+         Directional(direction: -w, condition: Dirichlet(0)),
+         Directional(direction: u, condition: Neumann(500 * -w)),
+    ],
+)
+
 `;
 
 export const App = () => {
@@ -65,6 +69,9 @@ export const App = () => {
     const handleEditorWillMount = (monaco: Monaco) => {
         initializeLanguage(monaco);
     };
+
+    const params = new URLSearchParams(window.location.search);
+    const zoom = Number(params.get("zoom") ?? 1);
 
     useEffect(() => {
         const handler = function (e) {
@@ -107,6 +114,7 @@ export const App = () => {
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
                         minimap: { enabled: false },
+                        fontSize: zoom * 12,
                     }}
                 />
             </div>
