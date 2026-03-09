@@ -28,18 +28,6 @@ component LBracket(radius: [0, 5]) {
 LBracket(radius: 2.5).show();
 
 LBracket(radius: 2.5).export_stl("LBracket.stl");
-
-const {
-    radius,
-} = LBracket.optimize(
-    objective: MaxStress,
-    material: Aluminum,
-    boundaryConditions: [
-         Directional(direction: -w, condition: Dirichlet(0)),
-         Directional(direction: u, condition: Neumann(500 * -w)),
-    ],
-)
-
 `;
 
 export const App = () => {
