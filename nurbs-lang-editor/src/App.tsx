@@ -26,8 +26,6 @@ component LBracket(radius: [0, 5]) {
 }
 
 LBracket(radius: 2.5).show();
-
-LBracket(radius: 2.5).export_stl("LBracket.stl");
 `;
 
 export const App = () => {
